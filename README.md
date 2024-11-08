@@ -37,13 +37,13 @@ A full-featured Expense Tracker web application built using the MERN stack (Mong
    ```bash
    cd expense-tracker
 3. Install the dependencies for both the frontend and backend:
+   ```bash
    # Install frontend dependencies
-    ```bash
+   
     cd client
     npm install
 
    # Install backend dependencies
-    ```bash
     cd ../server
     npm install
 4. Create a .env file in the server directory with the following variables:
@@ -51,13 +51,12 @@ A full-featured Expense Tracker web application built using the MERN stack (Mong
    JWT_SECRET=your-secret-key
 
 5. Run the application:
-   # Run backend server
    ```bash
+   # Run backend server
    cd server
    npm start
 
    # Run frontend client in a new terminal
-   ```bash
    cd client
    npm start
    
