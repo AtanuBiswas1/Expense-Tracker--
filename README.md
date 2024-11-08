@@ -4,17 +4,17 @@ A full-featured Expense Tracker web application built using the MERN stack (Mong
 
 ## Features
 
-- **Expense Tracking**: Users can add, edit, and delete expenses.
-- **Budget Management**: Set monthly or yearly budgets and get notified when nearing limits.
+- **Expense Tracking**: Users can add, and delete expenses.
+- **Budget Management**: Set monthly or yearly budgets.
 - **Data Visualization**: Charts and graphs powered by Chart.js provide a clear overview of spending habits.
 - **Multiple API Integration**: Interacts with various backend APIs to provide real-time financial data.
 - **Authentication**: User registration and login with JWT-based authentication.
 
-## Future Enhancements
+<!-- ## Future Enhancements
 
 - **Gemini API Integration**: Plan to integrate the Gemini API for additional data analysis and more personalized financial insights.
 - **Export to CSV/Excel**: Enable users to export their expense data to a CSV or Excel file for offline access.
-- **Recurring Expenses**: Set and manage recurring expenses like monthly bills.
+- **Recurring Expenses**: Set and manage recurring expenses like monthly bills. -->
 
 ## Technologies Used
 
@@ -63,3 +63,13 @@ A full-featured Expense Tracker web application built using the MERN stack (Mong
 6. The app should be running on http://localhost:3000 for the frontend and http://localhost:5000 for the backend.
 
 
+## Screenshots
+
+<!-- ### Dashboard with Charts
+![Dashboard with Charts](./screenshots/dashboard.png) -->
+
+### Adding a New Expense
+![Adding a New Expense](./screenshots/login.png)
+
+<!-- ### Budget Overview
+![Budget Overview](./screenshots/budget-overview.png) -->
