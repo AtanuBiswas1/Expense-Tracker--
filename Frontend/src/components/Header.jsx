@@ -5,11 +5,9 @@ import { logoutUrl } from "../constant.API_URL.js";
 
 function Header() {
   const { userData , isAuthenticated } = useSelector((state) => state.auth);
-  const [loading, setLoading] = useState(false);
   const dispatch=useDispatch()
 
   const logoutUser= async ()=>{
-    setLoading(true)
     try {
       const logoutResponce=await fetch(logoutUrl,{
         method:"POST",
@@ -18,11 +16,12 @@ function Header() {
           "Content-Type": "application/json",
         },
       })
-      const responceAfterLogout=await logoutResponce.json()
+      //const responceAfterLogout=await logoutResponce.json()
       dispatch(logout())
     } catch (error) {
-      
+      console.log("Server Error")
     }
+
   }
   
   return (

@@ -4,12 +4,15 @@ const loginUrl=backendServer+"/login"
 const logoutUrl=backendServer+"/logout"
 const addExpenceUrl=backendServer+"/addUserExpence"
 const addIncomeUrl=backendServer+"/addUserIncome"
-
+const showExpensesUrl=backendServer+"/expence/show/api"
+const showIncomeUrl=backendServer+"/income/show/api"
 
 export  {
     signupUrl,
     loginUrl,
     logoutUrl,
     addExpenceUrl,
-    addIncomeUrl
+    addIncomeUrl,
+    showExpensesUrl,
+    showIncomeUrl
 }

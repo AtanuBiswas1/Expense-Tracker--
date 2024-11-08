@@ -1,50 +1,129 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { ExpenceApicCall } from "../../API/apiCall.Function.js";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  ExpensesAPIData,
+  IncomeAPIData,
+} from "../../features/apiDate/apiData.Slice.js";
 
 function List() {
+  const Months = [
+    "Select",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "July",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const [selectedmonth, setMonth] = useState("");
+  const [selectedDate, setSelectDate] = useState("");
+  const [loading, setloading] = useState(false);
+  const { ExpensesData, IncomeData } = useSelector(
+    (state) => state.ExpensesANDIncomeAPICallData
+  );
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    setloading((prev)=>prev=!prev);
+    
+    const expensesData = ExpenceApicCall();
+    expensesData.then((value) => {
+      dispatch(ExpensesAPIData(value?.data?.Expenses));
+    });
+    setloading((prev)=>prev=!prev);
+    
+  }, []);
+
+  function ClickExpensesBtn() {
+    setloading((prev)=>prev=!prev);
+    const expensesData = ExpenceApicCall(selectedDate, selectedmonth);
+    expensesData.then((value) => {
+      dispatch(ExpensesAPIData(value?.data?.Expenses));
+    });
+    setloading((prev)=>prev=!prev);
+    
+  }
+
   return (
     <div>
       <div className="shadow-xl p-2 w-full flex justify-end gap-4">
-        <label htmlFor="allIncomeExpence">All-Income-Expence</label>
-        <select id="allIncomeExpence" className="bg-blue-300 rounded-2xl p-1">
-          <option value="All ">All</option>
-          <option value="Expence">Expence</option>
-          <option value="Incom">Income</option>
-        </select>
-        <label htmlFor="date">Date</label>
-        <select name="" id="date" className="bg-blue-300 rounded-2xl p-1">
-          <option value="">All</option>
-          <option value="">Today</option>
-          <option value="">Yesterday</option>
-          <option value="">Other Date</option>
-        </select>
+        <button
+          className="bg-green-300 px-2 py-1 rounded-lg "
+          onClick={ClickExpensesBtn}
+        >
+          Expence
+        </button>
+        <button className="bg-green-300 px-2 py-1 rounded-lg ">Income</button>
+        <input
+          type="date"
+          className="bg-gray-400 rounded-lg px-2 py-1"
+          onChange={(e) => setSelectDate(e.target.value)}
+        />
+        <div className="bg-slate-200 rounded-lg px-2 py-1">
+          <label htmlFor="month">Search using Month </label>
+          <select
+            id="month"
+            value={selectedmonth}
+            className="bg-blue-600 rounded-2xl p-1"
+            onChange={(event) => setMonth(event.target.value)}
+          >
+            {Months.map((month, key) => {
+              return <option key={key}>{month}</option>;
+            })}
+          </select>
+        </div>
       </div>
       <div className="">
-        <table className="min-w-full bg-orange-400 border-gray-300 rounded-xl">
+        <table className="min-w-full  border-gray-300 rounded-xl">
           <thead className="bg-amber-400 rounded-3xl">
             <tr className="">
-              <th className="py-2 px-4 text-left">Date</th>
-              <th className="py-2 px-4 text-left">Amount</th>
-              <th className="py-2 px-4 text-left">Status</th>
-              <th className="py-2 px-4 text-left">Description</th>
-              <th className="py-2 px-4 text-left">Category</th>
+              <th className="py-2 px-4 ">Date</th>
+              <th className="py-2 px-4 ">Amount</th>
+              <th className="py-2 px-4">Status</th>
+              <th className="py-2 px-4 ">Description</th>
+              <th className="py-2 px-4 ">Category</th>
             </tr>
           </thead>
-          <tbody>
-            <tr className="border-t border-gray-200 ">
-                <td>2/3/4</td>
-                <td>200</td>
-                <td>Income</td>
-                <td>Food</td>
-                <td>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Totam, libero?</td>
-            </tr>
-            <tr className="border-t border-gray-200">
-                <td>2/3/4</td>
-                <td>200</td>
-                <td>Income</td>
-                <td>Food</td>
-                <td>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nesciunt natus quisquam nobis inventore et illo dolor cumque, necessitatibus minima tempore.</td>
-            </tr>
-          </tbody>
+          {loading ? (
+            <tbody>
+              <tr>
+                <td>
+                  <h1>loading.....</h1>
+                  {console.log("line no 99", loading)}
+                </td>
+              </tr>
+            </tbody>
+          ) : !ExpensesData ? (
+            <tbody>
+              <tr>
+                <td>
+                  <h1>No data Found</h1>
+                  
+                </td>
+              </tr>
+            </tbody>
+          ) : (
+            <tbody className="text-center">
+              {ExpensesData.map((item, key) => {
+                return (
+                  <tr className="border-t border-gray-200" key={key}>
+                    <td>{new Date(item.date).toLocaleDateString("en-GB")}</td>
+                    <td>{item.amount}</td>
+                    <td>{item.status}</td>
+                    <td>{item.category}</td>
+                    <td>{item.description}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          )}
         </table>
       </div>
     </div>
@@ -52,3 +131,4 @@ function List() {
 }
 
 export default List;
+

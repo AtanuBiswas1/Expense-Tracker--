@@ -2,51 +2,23 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import Input from "./Input";
-import { loginUrl } from "../constant.API_URL.js";
+import { loginFunction } from "../API/apiCall.Function.js";
 import { useDispatch } from "react-redux";
-import {
-  setUserData,
-  checkAuth,
-} from "../features/loginuser/loginUser.Slice.js";
+import { checkAuth } from "../features/loginuser/loginUser.Slice.js";
 
 function Login() {
   const { register, handleSubmit, reset } = useForm();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
   const dispatch = useDispatch();
 
-  //................................login functionality...................
   async function loginData(data) {
     setLoading(true);
-    try {
-      const responce = await fetch(loginUrl, {
-        method: "POST",
-        credentials: "include", // Send cookies in cross-origin requests
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      const responceAfterLogin = await responce.json();
-      setLoginMessage(responceAfterLogin.message);
-      reset();
-      if (responceAfterLogin.success) {
-        localStorage.setItem(
-          "afterLoginUserDataInLocalStore",
-          JSON.stringify(responceAfterLogin)
-        );
-        dispatch(checkAuth());
-      }
-    } catch (error) {
-      //setError(error)
-      console.log("Login Error  ", error);
-    }
+    await loginFunction(data, setLoginMessage);
+    dispatch(checkAuth());
     setLoading(false);
   }
- 
-
-  //..............................................................................
 
   return (
     <div className=" flex flex-col items-center justify-center ">

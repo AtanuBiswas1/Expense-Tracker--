@@ -20,6 +20,14 @@ const UserSchema = new mongoose.Schema(
     avatar: {
       type: String, // cloudinary url (here we give original url of image in cloudinary and we get a link from cloudinary and it save in our database)
     },
+    totalSaveAmount:{
+      type:Number,
+      default:0
+    },
+    totalExpenceAmount:{
+      type:Number,
+      default:0
+    }
   },
   // timestamps save all date and time when user create account
   { timestamps: true }
