@@ -67,9 +67,13 @@ A full-featured Expense Tracker web application built using the MERN stack (Mong
 
 <!-- ### Dashboard with Charts
 ![Dashboard with Charts](./screenshots/dashboard.png) -->
-
-### Adding a New Expense
-![Adding a New Expense](/Screenshorts/login.png)
-
+### Signup page
+![Signup page](/Screenshorts//signup.png)
+### Login page
+![Login page](/Screenshorts/login.png)
+### Add Income
+![Add Income](/Screenshorts/AddIncome.png)
+### Add Expenses
+![Add Expenses](/Screenshorts/AddExpenses.png)
 <!-- ### Budget Overview
 ![Budget Overview](./screenshots/budget-overview.png) -->
