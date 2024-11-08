@@ -34,13 +34,16 @@ A full-featured Expense Tracker web application built using the MERN stack (Mong
    git clone https://github.com/your-username/expense-tracker.git
 
 2. Navigate into the project directory:
+   ```bash
    cd expense-tracker
 3. Install the dependencies for both the frontend and backend:
    # Install frontend dependencies
+    ```bash
     cd client
     npm install
 
    # Install backend dependencies
+    ```bash
     cd ../server
     npm install
 4. Create a .env file in the server directory with the following variables:
@@ -49,10 +52,12 @@ A full-featured Expense Tracker web application built using the MERN stack (Mong
 
 5. Run the application:
    # Run backend server
+   ```bash
    cd server
    npm start
 
    # Run frontend client in a new terminal
+   ```bash
    cd client
    npm start
    
