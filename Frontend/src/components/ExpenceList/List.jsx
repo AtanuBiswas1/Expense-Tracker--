@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { ExpenceApicCall } from "../../API/apiCall.Function.js";
+import { ExpenceApiCall, IncomeApiCall } from "../../API/apiCall.Function.js";
 import { useSelector, useDispatch } from "react-redux";
 import {
   ExpensesAPIData,
   IncomeAPIData,
+  UpdateExpenseDate,
+  UpdateIncomeData,
 } from "../../features/apiDate/apiData.Slice.js";
 
 function List() {
@@ -25,32 +27,40 @@ function List() {
   const [selectedmonth, setMonth] = useState("");
   const [selectedDate, setSelectDate] = useState("");
   const [loading, setloading] = useState(false);
-  const { ExpensesData, IncomeData } = useSelector(
-    (state) => state.ExpensesANDIncomeAPICallData
-  );
+  const [showIncomeTable,setShowIncomeTable]=useState(true)
+  const { ExpensesData, IncomeData, newIncomeUpdate, newExpenseUpdate } =
+    useSelector((state) => state.ExpensesANDIncomeAPICallData);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    setloading((prev)=>prev=!prev);
-    
-    const expensesData = ExpenceApicCall();
+    setloading((prev) => (prev = !prev));
+
+    const expensesData = ExpenceApiCall();
     expensesData.then((value) => {
       dispatch(ExpensesAPIData(value?.data?.Expenses));
     });
-    setloading((prev)=>prev=!prev);
-    
-  }, []);
+    setloading((prev) => (prev = !prev));
+  }, [newExpenseUpdate]);
 
   function ClickExpensesBtn() {
-    setloading((prev)=>prev=!prev);
-    const expensesData = ExpenceApicCall(selectedDate, selectedmonth);
+    setShowIncomeTable(true)
+    setloading((prev) => (prev = !prev));
+    const expensesData = ExpenceApiCall(selectedDate, selectedmonth);
     expensesData.then((value) => {
       dispatch(ExpensesAPIData(value?.data?.Expenses));
     });
-    setloading((prev)=>prev=!prev);
-    
+    setloading((prev) => (prev = !prev));
   }
-
+  function ClickIncomeBtn() {
+    setShowIncomeTable(false)
+    setloading((prev) => (prev = !prev));
+    const IncomeData = IncomeApiCall(selectedDate, selectedmonth);
+    IncomeData.then((value) => {
+      console.log(value);
+      dispatch(IncomeAPIData(value?.data?.Income));
+    });
+    setloading((prev) => (prev = !prev));
+  }
   return (
     <div>
       <div className="shadow-xl p-2 w-full flex justify-end gap-4">
@@ -58,9 +68,14 @@ function List() {
           className="bg-green-300 px-2 py-1 rounded-lg "
           onClick={ClickExpensesBtn}
         >
-          Expence
+          Expense
         </button>
-        <button className="bg-green-300 px-2 py-1 rounded-lg ">Income</button>
+        <button
+          className="bg-green-300 px-2 py-1 rounded-lg "
+          onClick={ClickIncomeBtn}
+        >
+          Income
+        </button>
         <input
           type="date"
           className="bg-gray-400 rounded-lg px-2 py-1"
@@ -80,8 +95,8 @@ function List() {
           </select>
         </div>
       </div>
-      <div className="">
-        <table className="min-w-full  border-gray-300 rounded-xl">
+      <div>
+        <table className="min-w-full  border-gray-300 rounded-xl ">
           <thead className="bg-amber-400 rounded-3xl">
             <tr className="">
               <th className="py-2 px-4 ">Date</th>
@@ -89,6 +104,7 @@ function List() {
               <th className="py-2 px-4">Status</th>
               <th className="py-2 px-4 ">Description</th>
               <th className="py-2 px-4 ">Category</th>
+              <th className="py-2 px-4"></th>
             </tr>
           </thead>
           {loading ? (
@@ -105,7 +121,6 @@ function List() {
               <tr>
                 <td>
                   <h1>No data Found</h1>
-                  
                 </td>
               </tr>
             </tbody>
@@ -119,6 +134,9 @@ function List() {
                     <td>{item.status}</td>
                     <td>{item.category}</td>
                     <td>{item.description}</td>
+                    <td>
+                      <button>Delete</button>
+                    </td>
                   </tr>
                 );
               })}
@@ -126,9 +144,9 @@ function List() {
           )}
         </table>
       </div>
+      <div></div>
     </div>
   );
 }
 
 export default List;
-

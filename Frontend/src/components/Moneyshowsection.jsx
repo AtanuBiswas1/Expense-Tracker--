@@ -1,41 +1,74 @@
 import React, { useState } from "react";
 import MoneyCard from "./MoneyCard";
-import PopupAddIncome from "./PopupAddIncome"
-import PopupAddExpence from "./PopupAddExpence"
+import PopupAddIncome from "./PopupAddIncome";
+import PopupAddExpense from "./PopupAddExpence";
 
 function Moneyshowsection() {
   const [addIncome, setAddIncome] = useState(false);
-  const [addExpence, setAddExpence] = useState(false);
-  
+  const [addExpense, setAddExpense] = useState(false);
+
+  const ClickAddIncomeBtn = () => {
+    setAddIncome(true);
+    setAddExpense(false);
+  };
+  const ClickAddExpense = () => {
+    setAddExpense(true);
+    setAddIncome(false);
+  };
   return (
     <>
       <div className="flex gap-3">
         <MoneyCard titel="Total Balence" totalBal={100} />
         <MoneyCard
-          titel="Income Balence"
+          titel=" Total Income Balence"
           totalBal={300}
           bgColor="bg-blue-900"
         />
-        <MoneyCard titel="Expence" totalBal={200} bgColor="bg-yellow-900" />
+        <MoneyCard
+          titel="Total Expense"
+          totalBal={200}
+          bgColor="bg-yellow-900"
+        />
         <div>
           <button
             className="p-3 bg-green-500 m-3 mt-8 rounded-xl"
-            onClick={() => setAddIncome(true)}
+            onClick={ClickAddIncomeBtn}
           >
             Add Income
           </button>
           <button
             className="p-3 bg-red-500 m-3 mt-8 rounded-xl"
-            onClick={() => setAddExpence(true)}
+            onClick={ClickAddExpense}
           >
-            Add Expence
+            Add Expense
           </button>
         </div>
       </div>
-       <div className="p-3 m-2 flex justify-around">
+      {!addIncome ? (
+        ""
+      ) : (
+        <div
+          className={`w-full h-full items-center p-3 flex justify-around z-10 absolute top-0 bg-customBackgroundColorBlack }`}
+        >
+          {addIncome ? <PopupAddIncome setAddIncome={setAddIncome} /> : null}
+        </div>
+      )}
+      {!addExpense ? (
+        ""
+      ) : (
+        <div
+          className={`w-full h-full p-3 flex justify-around z-10 absolute top-0 bg-customBackgroundColorBlack }`}
+        >
+          {addExpense ? (
+            <PopupAddExpense setAddExpense={setAddExpense} />
+          ) : null}
+        </div>
+      )}
+
+      {/* <div className={`w-full p-3 m-2 flex justify-around bg-red-500 z-10 absolute top-0 }`} >
        {addIncome ? <PopupAddIncome setAddIncome={setAddIncome} /> : null}
-       {addExpence ? <PopupAddExpence setAddExpence={setAddExpence}/>:null}
-       </div>
+       {addExpense ? <PopupAddExpense setAddExpense={setAddExpense}/>:null}
+       </div> */}
     </>
   );
 }

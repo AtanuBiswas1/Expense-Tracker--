@@ -27,7 +27,7 @@ function Header() {
   return (
     <div className=" h-11 flex justify-between bg-slate-400">
       <div className="px-4 py-1">
-        <h1>Exprence Traker</h1>
+        <h1>Expense Traker</h1>
       </div>
       
       {isAuthenticated?

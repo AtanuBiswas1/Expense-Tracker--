@@ -50,7 +50,7 @@ async function loginFunction(userGivenDataForLogin, setLoginMessage) {
 }
 
 
-async function ExpenceApicCall(date="",month="") {
+async function ExpenceApiCall(date="",month="") {
     const data={
         date,
         month
@@ -75,6 +75,30 @@ async function ExpenceApicCall(date="",month="") {
     }
 }
 
+async function IncomeApiCall(date="",month="") {
+  const data={
+      date,
+      month
+    }
+    
+    const params = new URLSearchParams(data);
+    const newShowIncomeUrl=showIncomeUrl+`?${params.toString()}`
+  try {
+      const responce = await fetch(newShowIncomeUrl, {
+          method: "GET",
+          credentials: "include", // Send cookies in cross-origin requests
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const responceAfterLogin = await responce.json();
+        //console.log("line no 72",responceAfterLogin);
+        return responceAfterLogin
+  } catch (error) {
+      console.log("Login Error  ", error);
+      return error
+  }
+}
 
 
 
@@ -88,5 +112,4 @@ async function ExpenceApicCall(date="",month="") {
 
 
 
-
-export { signupFunction, loginFunction,ExpenceApicCall };
+export { signupFunction, loginFunction,ExpenceApiCall,IncomeApiCall };

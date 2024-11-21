@@ -1,28 +1,30 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import Input from "./Input";
-import {addExpenceUrl} from "../constant.API_URL.js"
+import { addExpenceUrl } from "../constant.API_URL.js";
+import { useDispatch } from "react-redux";
+import {
+  UpdateExpenseDate,
+} from "../features/apiDate/apiData.Slice.js";
 
-function PopupAddExpence({setAddExpence}) {
+function PopupAddExpence({ setAddExpense }) {
   const { register, handleSubmit } = useForm();
+  const dispatch = useDispatch();
   async function submitData(data) {
-    const responce=await fetch(addExpenceUrl,{
-      method:"POST",
-      credentials:"include",
-      headers:{
-        "Content-Type":"application/json",
+    const responce = await fetch(addExpenceUrl, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
-    })
-    const responceOfAddExpence=await responce.json()
-    console.log(responceOfAddExpence)
-   // console.log(data);
-
-    data ? setAddExpence(false) : null;
+    });
+    data ? setAddExpense(false) : null;
+    dispatch(UpdateExpenseDate());
   }
   return (
     <div>
-      <div className=" shadow-2xl  w-[100%] rounded-xl p-3 font-bold ">
+      <div className=" shadow-2xl  w-[100%] rounded-xl p-3 font-bold bg-white ">
         <h1>Add Money</h1>
         <div>
           <form onSubmit={handleSubmit(submitData)}>
@@ -49,7 +51,7 @@ function PopupAddExpence({setAddExpence}) {
             />
             <div className="text-right">
               <button
-                onClick={() => setAddExpence(false)}
+                onClick={() => setAddExpense(false)}
                 className="p-3 bg-red-500 m-3 mt-8 rounded-xl w-24 font-serif"
               >
                 Cancle

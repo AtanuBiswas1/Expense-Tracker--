@@ -3,9 +3,11 @@ import { createSlice } from "@reduxjs/toolkit";
 const apiSlice=createSlice({
     name:"ExpensesANDIncomeAPICallData",
     initialState:{
-        apiData:null,
+        // apiData:null,
         ExpensesData:"",
         IncomeData:null,
+        newIncomeUpdate:false,
+        newExpenseUpdate:false
     },
     reducers:{
      ExpensesAPIData : (state,action)=>{
@@ -13,9 +15,15 @@ const apiSlice=createSlice({
      },
      IncomeAPIData:(state,action)=>{
        state.IncomeData=action.payload;
+     },
+     UpdateIncomeData:(state)=>{
+      state.newIncomeUpdate=true;
+     },
+     UpdateExpenseDate:(state)=>{
+      state.newExpenseUpdate=true;
      }
     }
 })
 
-export const {ExpensesAPIData,IncomeAPIData}=apiSlice.actions;
+export const {ExpensesAPIData,IncomeAPIData,UpdateExpenseDate,UpdateIncomeData}=apiSlice.actions;
 export default apiSlice.reducer;

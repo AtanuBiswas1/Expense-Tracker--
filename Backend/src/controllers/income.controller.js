@@ -58,9 +58,9 @@ const IncomeSendToFrontend = asyncHandaler(async (req, resp) => {
   //   query.createdAt = { $gte: startDate, $lt: endDate };
   // }
   
-  const expenses = await Budget.find(query).sort({ date: -1 });
-  // console.log(expenses)
-  if (!expenses.length) {
+  const incomes = await Budget.find(query).sort({ date: -1 });
+ 
+  if (!incomes.length) {
     return resp
       .status(404)
       .json(
@@ -73,7 +73,7 @@ const IncomeSendToFrontend = asyncHandaler(async (req, resp) => {
     new ApiResponce(
       200,
       {
-        Expenses: expenses,
+        Income: incomes,
       },
       " Income found for the specified filters"
     )
