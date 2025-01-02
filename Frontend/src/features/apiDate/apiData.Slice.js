@@ -3,13 +3,16 @@ import { createSlice } from "@reduxjs/toolkit";
 const apiSlice = createSlice({
   name: "ExpensesANDIncomeAPICallData",
   initialState: {
-    // apiData:null,
+    ShowGraph_notList:true,
     ExpensesData: "",
     IncomeData: null,
     newIncomeUpdate: false,
     newExpenseUpdate: false,
   },
   reducers: {
+    Toggle_ShowGraph_notList:(state,action)=>{
+      state.ShowGraph_notList=!state.ShowGraph_notList;
+    },
     ExpensesAPIData: (state, action) => {
       state.ExpensesData = action.payload;
     },
@@ -26,6 +29,7 @@ const apiSlice = createSlice({
 });
 
 export const {
+  Toggle_ShowGraph_notList,
   ExpensesAPIData,
   IncomeAPIData,
   UpdateExpenseDate,
