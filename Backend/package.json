@@ -7,7 +7,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
+<<<<<<< HEAD
     "start": "node -r dotenv/config --experimental-json-modules src/index.js "
+=======
+    "start": "node src/index.js "
+>>>>>>> 6ed40e9d364e3022df088a555e10ad82968a2e03
   },
   "author": "",
   "license": "ISC",
