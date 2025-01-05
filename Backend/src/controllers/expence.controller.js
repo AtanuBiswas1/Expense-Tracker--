@@ -45,8 +45,9 @@ const userExpenceSave = asyncHandaler(async (req, resp) => {
 //2. all expence sent to frontend with pagination technique
 const ExpenseSendToFrontend = asyncHandaler(async (req, resp) => {
   const { date, month } = req.query;
+  const user = await User.findById(req.user?._id);
   let query = { user: req.user._id }; // Query for logged-in user's expenses
-  console.log("line no 49",req.query)
+  //console.log("line no 49",req.query)
   // Add date filtering to the query if provided
   if (date) {
     query.date = new Date(date);
@@ -58,7 +59,7 @@ const ExpenseSendToFrontend = asyncHandaler(async (req, resp) => {
      */
     query.date = { $gte: startDate, $lt: endDate };
   }
-  console.log("line no 61",query)
+  //console.log("line no 61",query)
   const expenses = await Expense.find(query).sort({ date: -1 });
  // console.log("line no 63",expenses);
   
@@ -76,7 +77,11 @@ const ExpenseSendToFrontend = asyncHandaler(async (req, resp) => {
       {
         Expenses: expenses,
       },
-      " expenses found for the specified filters"
+      {
+        TotalExpence: user.totalExpenceAmount,
+        message:" expenses found for the specified filters"
+      }
+      
     )
   );
 });

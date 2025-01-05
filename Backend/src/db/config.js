@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { DB_NANE } from "../constant.js";
 
 
+
 const connectDB= async ()=>{
     try {
        const connectionDB= await mongoose.connect(`${process.env.MONGODB_URL}/${DB_NANE}`)
@@ -10,7 +11,7 @@ const connectDB= async ()=>{
        
     
     } catch (error) {
-        console.log("Mongodb connection error in /db/config,js",error)
+        console.log("Mongodb connection error in /db/config.js",error)
         process.exit(1)
     }
 }

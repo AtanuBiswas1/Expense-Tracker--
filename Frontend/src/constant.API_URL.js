@@ -1,11 +1,12 @@
-const backendServer="http://localhost:8000/api/v1/users"
-const signupUrl=backendServer+"/register"
-const loginUrl=backendServer+"/login"
-const logoutUrl=backendServer+"/logout"
-const addExpenceUrl=backendServer+"/addUserExpence"
-const addIncomeUrl=backendServer+"/addUserIncome"
-const showExpensesUrl=backendServer+"/expence/show/api"
-const showIncomeUrl=backendServer+"/income/show/api"
+//const backendServer="http://localhost:8000"
+const backendServer="https://expense-tracker-eta-lac.vercel.app"
+const signupUrl=backendServer+"/api/v1/users/register"
+const loginUrl=backendServer+"/api/v1/users/login"
+const logoutUrl=backendServer+"/api/v1/users/logout"
+const addExpenceUrl=backendServer+"/api/v1/users/addUserExpence"
+const addIncomeUrl=backendServer+"/api/v1/users/addUserIncome"
+const showExpensesUrl=backendServer+"/api/v1/users/expence/show/api"
+const showIncomeUrl=backendServer+"/api/v1/users/income/show/api"
 
 export  {
     signupUrl,

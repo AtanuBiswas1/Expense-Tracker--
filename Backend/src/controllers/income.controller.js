@@ -6,7 +6,7 @@ import { User } from "../model/user.model.js";
 
 const userIncomeSave = asyncHandaler(async (req, resp) => {
   const { amount, category } = req.body;
-  console.log(req.body);
+  //console.log(req.body);
   if (amount === "" || category === "") {
     console.log(new ApiError(400, "Must be fill all fild"));
   }
@@ -45,6 +45,7 @@ const IncomeSendToFrontend = asyncHandaler(async (req, resp) => {
   const { date, month } = req.query;
   let query = { user: req.user._id }; // Query for logged-in user's expenses
   
+  const user = await User.findById(req.user?._id);
 
   // Add date filtering to the query if provided
   // if (date) {
@@ -75,7 +76,11 @@ const IncomeSendToFrontend = asyncHandaler(async (req, resp) => {
       {
         Income: incomes,
       },
-      " Income found for the specified filters"
+      {
+        TotalIncome: user.totalSaveAmount,
+        message:" Income found for the specified filters"
+      }
+      
     )
   );
 });

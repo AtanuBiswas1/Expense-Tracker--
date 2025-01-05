@@ -116,6 +116,7 @@ const loginUser = asyncHandaler(async (req, resp) => {
   const accessToken = await generateAccessToken(user._id);
   //console.log("line 103",accessToken);
   const loggedInUser = await User.findById(user._id).select("-password");
+  
 
   const option = {
     // this option works for anyone can't modify cookie by frontend
