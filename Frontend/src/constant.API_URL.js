@@ -1,5 +1,5 @@
-//const backendServer="http://localhost:8000"
-const backendServer="https://expense-tracker-eta-lac.vercel.app"
+const backendServer="http://localhost:8000"
+//const backendServer="https://expense-tracker-eta-lac.vercel.app"
 const signupUrl=backendServer+"/api/v1/users/register"
 const loginUrl=backendServer+"/api/v1/users/login"
 const logoutUrl=backendServer+"/api/v1/users/logout"

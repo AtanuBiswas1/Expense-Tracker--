@@ -1,9 +1,16 @@
+import 'dotenv/config'
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 
 const app = express()
-//console.log("process.env.CORS_ORIGIN:",process.env.CORS_ORIGIN)
+console.log("process.env.CORS_ORIGIN:",process.env.CORS_ORIGIN)
+console.log("app.js:---->",process.env.MONGODB_URL)
+//send somthing to page .................................................................
+app.get("/", (req, res) => {
+    res.send("Hello, World!");
+  });
+//...........................................................................................
 app.use(cors({
     //origin: "http://localhost:5173",
     origin: process.env.CORS_ORIGIN,
