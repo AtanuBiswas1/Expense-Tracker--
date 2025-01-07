@@ -4,10 +4,10 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 
 const app = express()
-console.log("process.env.CORS_ORIGIN:",process.env.CORS_ORIGIN)
-console.log("app.js:---->",process.env.MONGODB_URL)
+// console.log("process.env.CORS_ORIGIN:",process.env.CORS_ORIGIN)
+// console.log("app.js:---->",process.env.MONGODB_URL)
 //send somthing to page .................................................................
-app.get("/", (req, res) => {
+app.get("/hellow", (req, res) => {
     res.send("Hello, World!");
   });
 //...........................................................................................
