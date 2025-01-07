@@ -44,24 +44,32 @@ const userExpenceSave = asyncHandaler(async (req, resp) => {
 
 //2. all expence sent to frontend with pagination technique
 const ExpenseSendToFrontend = asyncHandaler(async (req, resp) => {
-  const { date, month } = req.query;
+  const { date, month,year } = req.query;
   const user = await User.findById(req.user?._id);
   let query = { user: req.user._id }; // Query for logged-in user's expenses
-  //console.log("line no 49",req.query)
+  console.log("line no 49",req.query)
   // Add date filtering to the query if provided
   if (date) {
     query.date = new Date(date);
-  } else if (month) {
-    const startDate = new Date(`2024-${month}-01`);
-    const endDate = new Date(`2024-${month}-31`);
-    /*const endDate = new Date(startDate);
-        endDate.setMonth(startDate.getMonth() + 1); 
-     */
-    query.date = { $gte: startDate, $lt: endDate };
+  }else if (year && month) {
+    const startDate = new Date(`${year}-${month}-01`);
+    const endDate = new Date(startDate);
+    endDate.setMonth(startDate.getMonth() + 1); // Move to the first day of the next month
+    query.date = { $gte: startDate, $lt: endDate }; // Filter for the selected month
   }
+  // } else if (month) {
+  //   const startDate = new Date(`2025-${month}-01`);
+  //   const endDate = new Date(`2025-${month}-31`);
+  //   // const startDate = new Date(`2025-02-01`);
+  //   // const endDate = new Date(`2025-02-31`);
+  //   /*const endDate = new Date(startDate);
+  //       endDate.setMonth(startDate.getMonth() + 1); 
+  //    */
+  //   query.date = { $gte: startDate, $lt: endDate };
+  // }
   //console.log("line no 61",query)
   const expenses = await Expense.find(query).sort({ date: -1 });
- // console.log("line no 63",expenses);
+  console.log("line no 63",expenses);
   
   if (!expenses.length) {
     return resp

@@ -5,6 +5,7 @@ const initialState = {
   isAuthenticated: false,
   userData: null,
   accessToken: null,
+ 
 };
 
 // authSlice ---> redux slice define for login user

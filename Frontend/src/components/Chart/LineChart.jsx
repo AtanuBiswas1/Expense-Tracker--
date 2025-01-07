@@ -62,7 +62,7 @@ const LineChart = ({ AllDataofIncomeExpenses }) => {
   };
 
   return (
-    <div className="h-[400px]">
+    <div className="h-[400px] ">
       <Line data={data} options={options} />
     </div>
   );

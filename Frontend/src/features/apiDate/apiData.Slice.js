@@ -3,15 +3,17 @@ import { createSlice } from "@reduxjs/toolkit";
 const apiSlice = createSlice({
   name: "ExpensesANDIncomeAPICallData",
   initialState: {
-    ShowGraph_notList:true,
+    ShowGraph_notList: true,
     ExpensesData: "",
     IncomeData: null,
     newIncomeUpdate: false,
     newExpenseUpdate: false,
+    TotalIncome:null,
+    TotalExpense:null
   },
   reducers: {
-    Toggle_ShowGraph_notList:(state,action)=>{
-      state.ShowGraph_notList=!state.ShowGraph_notList;
+    Toggle_ShowGraph_notList: (state, action) => {
+      state.ShowGraph_notList = !state.ShowGraph_notList;
     },
     ExpensesAPIData: (state, action) => {
       state.ExpensesData = action.payload;
@@ -25,6 +27,13 @@ const apiSlice = createSlice({
     UpdateExpenseDate: (state) => {
       state.newExpenseUpdate = true;
     },
+    setTotalIncome:(state,action)=>{
+      state.TotalIncome=action.payload
+    },
+    setTotalExpense:(state,action)=>{
+      state.TotalExpense=action.payload
+    }
+    
   },
 });
 
@@ -34,5 +43,7 @@ export const {
   IncomeAPIData,
   UpdateExpenseDate,
   UpdateIncomeData,
+  setTotalExpense,
+  setTotalIncome
 } = apiSlice.actions;
 export default apiSlice.reducer;

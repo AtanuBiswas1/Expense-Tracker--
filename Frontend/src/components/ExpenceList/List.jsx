@@ -25,6 +25,7 @@ function List() {
 
   const [selectedmonth, setMonth] = useState("");
   const [selectedDate, setSelectDate] = useState("");
+  const [selctedYear,setSelectedYear]=useState(2025);
   const [loading, setLoading] = useState(false);
   const [showIncomeTable, setShowIncomeTable] = useState(false);
   const [isIncomeDataAgainCall, setIsIncomeDataAgainCall] = useState(false);
@@ -39,21 +40,23 @@ function List() {
 
     setLoading(true);
     try {
-      const response = await ExpenceApiCall(selectedDate, selectedmonth);
+      const response = await ExpenceApiCall(selectedDate, selectedmonth,selctedYear);
+      //console.log("responce of expenses:",response)
       dispatch(ExpensesAPIData(response?.data?.Expenses));
     } catch (error) {
       console.error("Error fetching expenses data:", error);
     } finally {
       setLoading(false);
     }
-  }, [selectedDate, selectedmonth, dispatch]);
+  }, [selectedDate, selectedmonth,dispatch]);
 
   // Fetch Income Data
   const fetchIncomeData = useCallback(async () => {
     if (isIncomeDataAgainCall) {
       setLoading(true);
       try {
-        const response = await IncomeApiCall(selectedDate, selectedmonth);
+        const response = await IncomeApiCall(selectedDate, selectedmonth,selctedYear);
+        //console.log("responce of incomes:",response)
         dispatch(IncomeAPIData(response?.data?.Income));
       } catch (error) {
         console.error("Error fetching income data:", error);
@@ -102,9 +105,9 @@ function List() {
         <td>{item.status}</td>
         <td>{item.category}</td>
         <td>{item.description}</td>
-        <td>
+        {/* <td>
           <button>Delete</button>
-        </td>
+        </td> */}
       </tr>
     ));
   }, [ExpensesData]);
@@ -125,9 +128,9 @@ function List() {
         <td>{item.amount}</td>
         <td>{item.status}</td>
         <td>{item.description}</td>
-        <td>
+        {/* <td>
           <button>Delete</button>
-        </td>
+        </td> */}
       </tr>
     ));
   }, [IncomeData]);
@@ -158,8 +161,9 @@ function List() {
             id="month"
             value={selectedmonth}
             className="bg-blue-600 rounded-2xl p-1"
-            onChange={(event) => setMonth(event.target.value)}
+            onChange={(event) => setMonth(Months.indexOf(event.target.value))}
           >
+            {/* {console.log(selectedmonth)} */}
             {Months.map((month, key) => (
               <option key={key}>{month}</option>
             ))}

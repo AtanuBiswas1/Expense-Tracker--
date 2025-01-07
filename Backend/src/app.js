@@ -4,10 +4,10 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 
 const app = express()
-// console.log("process.env.CORS_ORIGIN:",process.env.CORS_ORIGIN)
+console.log("process.env.CORS_ORIGIN:",process.env.CORS_ORIGIN)
 // console.log("app.js:---->",process.env.MONGODB_URL)
 //send somthing to page .................................................................
-app.get("/hellow", (req, res) => {
+app.get("/", (req, res) => {
     res.send("Hello, World!");
   });
 //...........................................................................................
@@ -18,7 +18,6 @@ app.use(cors({
 }))
 
 app.use(express.json())
-//app.use(express.urlencoded({extended: true, limit: "16kb"}))
 app.use(express.static("public"))
 app.use(cookieParser())
 

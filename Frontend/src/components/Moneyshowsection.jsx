@@ -1,11 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MoneyCard from "./MoneyCard";
 import PopupAddIncome from "./PopupAddIncome";
 import PopupAddExpense from "./PopupAddExpence";
+import { useSelector ,useDispatch} from "react-redux";
 
 function Moneyshowsection() {
   const [addIncome, setAddIncome] = useState(false);
   const [addExpense, setAddExpense] = useState(false);
+
+  const { TotalIncome,TotalExpense } = useSelector(
+    (state) => state.ExpensesANDIncomeAPICallData
+  );
+  
+
+ 
 
   const ClickAddIncomeBtn = () => {
     setAddIncome(true);
@@ -18,15 +26,15 @@ function Moneyshowsection() {
   return (
     <>
       <div className="flex gap-3">
-        <MoneyCard titel="Total Balence" totalBal={100} />
+        <MoneyCard titel="Total Balence" totalBal={TotalIncome + TotalExpense} />
         <MoneyCard
           titel=" Total Income Balence"
-          totalBal={300}
+          totalBal={TotalIncome}
           bgColor="bg-blue-900"
         />
         <MoneyCard
           titel="Total Expense"
-          totalBal={200}
+          totalBal={TotalExpense}
           bgColor="bg-yellow-900"
         />
         <div>

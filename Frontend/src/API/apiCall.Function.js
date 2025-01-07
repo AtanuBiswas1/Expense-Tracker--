@@ -50,10 +50,12 @@ async function loginFunction(userGivenDataForLogin, setLoginMessage) {
 }
 
 
-async function ExpenceApiCall(date="",month="") {
+async function ExpenceApiCall(date="",month="",year="") {
     const data={
         date,
-        month
+        month,
+        year
+       
       }
       
       const params = new URLSearchParams(data);
@@ -75,10 +77,11 @@ async function ExpenceApiCall(date="",month="") {
     }
 }
 
-async function IncomeApiCall(date="",month="") {
+async function IncomeApiCall(date="",month="",year="") {
   const data={
       date,
-      month
+      month,
+      year
     }
     
     const params = new URLSearchParams(data);

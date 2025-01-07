@@ -42,7 +42,7 @@ const userIncomeSave = asyncHandaler(async (req, resp) => {
 
 //2. all Income sent to frontend with pagination technique
 const IncomeSendToFrontend = asyncHandaler(async (req, resp) => {
-  const { date, month } = req.query;
+  const { date, month ,year } = req.query;
   let query = { user: req.user._id }; // Query for logged-in user's expenses
   
   const user = await User.findById(req.user?._id);
@@ -58,6 +58,14 @@ const IncomeSendToFrontend = asyncHandaler(async (req, resp) => {
   //      */
   //   query.createdAt = { $gte: startDate, $lt: endDate };
   // }
+  if (date) {
+    query.date = new Date(date);
+  }else if (year && month) {
+    const startDate = new Date(`${year}-${month}-01`);
+    const endDate = new Date(startDate);
+    endDate.setMonth(startDate.getMonth() + 1); // Move to the first day of the next month
+    query.date = { $gte: startDate, $lt: endDate }; // Filter for the selected month
+  }
   
   const incomes = await Budget.find(query).sort({ date: -1 });
  
