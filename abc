@@ -1,3 +1,5 @@
 --experimental-json-modules
 -r dotenv/config --experimental-json-modules src/index.js
 -r dotenv/config
+
+"dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
