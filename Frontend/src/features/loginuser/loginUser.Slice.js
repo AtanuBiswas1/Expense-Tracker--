@@ -33,6 +33,7 @@ const authSlice = createSlice({
           const [key, value] = cookie.split("=");
           cookieObject[key] = value;
         });
+        console.log(cookieObject)
         return cookieObject;
       }
       const checkTokenExpire = getCookieObject();

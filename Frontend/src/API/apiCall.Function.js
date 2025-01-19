@@ -10,7 +10,7 @@ import {
 
 async function signupFunction(userGivenDataForSignup, setResponceData) {
   try {
-    let responce = await fetch("http://localhost:8000/api/v1/users/register", {
+    let responce = await fetch(signupUrl, {
       method: "POST",
       headers: {
         "content-Type": "application/json",
