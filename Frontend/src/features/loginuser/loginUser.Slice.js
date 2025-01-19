@@ -26,6 +26,7 @@ const authSlice = createSlice({
     checkAuth: (state) => {
       function getCookieObject() {
         const cookieString = document.cookie;
+        console.log(cookieString)
         const cookieArray = cookieString.split("; ");
         const cookieObject = {};
 
