@@ -37,7 +37,7 @@ async function loginFunction(userGivenDataForLogin, setLoginMessage) {
     });
     const responceAfterLogin = await responce.json();
     setLoginMessage(responceAfterLogin.message);
-
+    console.log(responceAfterLogin)
     if (responceAfterLogin.success) {
       localStorage.setItem(
         "afterLoginUserDataInLocalStore",
