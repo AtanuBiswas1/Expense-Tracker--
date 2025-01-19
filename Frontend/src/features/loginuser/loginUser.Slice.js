@@ -38,11 +38,11 @@ const authSlice = createSlice({
         return cookieObject;
       }
       const checkTokenExpire = getCookieObject();
-      if (!checkTokenExpire.accessToken) {
-        localStorage.removeItem("afterLoginUserDataInLocalStore");
-      }
+      // if (!checkTokenExpire.accessToken) {
+      //   localStorage.removeItem("afterLoginUserDataInLocalStore");
+      // }
       const storedUser = localStorage.getItem("afterLoginUserDataInLocalStore");
-
+      console.log("storedUser: ",storedUser)
       if (storedUser && checkTokenExpire.accessToken) {
         state.isAuthenticated = true;
         state.userData = JSON.parse(storedUser);

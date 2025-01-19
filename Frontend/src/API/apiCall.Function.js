@@ -37,12 +37,14 @@ async function loginFunction(userGivenDataForLogin, setLoginMessage) {
     });
     const responceAfterLogin = await responce.json();
     setLoginMessage(responceAfterLogin.message);
-    console.log(responceAfterLogin)
+    //console.log(responceAfterLogin)
     if (responceAfterLogin.success) {
+
       localStorage.setItem(
         "afterLoginUserDataInLocalStore",
         JSON.stringify(responceAfterLogin)
       );
+      console.log("success but not...")
     }
   } catch (error) {
     console.log("Login Error  ", error);
