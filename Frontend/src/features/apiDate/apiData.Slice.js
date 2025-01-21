@@ -8,8 +8,8 @@ const apiSlice = createSlice({
     IncomeData: null,
     newIncomeUpdate: false,
     newExpenseUpdate: false,
-    TotalIncome:null,
-    TotalExpense:null
+    TotalIncome:0,
+    TotalExpense:0
   },
   reducers: {
     Toggle_ShowGraph_notList: (state, action) => {
@@ -28,10 +28,10 @@ const apiSlice = createSlice({
       state.newExpenseUpdate = true;
     },
     setTotalIncome:(state,action)=>{
-      state.TotalIncome=action.payload
+      state.TotalIncome=action.payload || 0
     },
     setTotalExpense:(state,action)=>{
-      state.TotalExpense=action.payload
+      state.TotalExpense=action.payload || 0
     }
     
   },

@@ -42,8 +42,9 @@ const authSlice = createSlice({
       //   localStorage.removeItem("afterLoginUserDataInLocalStore");
       // }
       const storedUser = localStorage.getItem("afterLoginUserDataInLocalStore");
+      //&& checkTokenExpire.accessToken
       console.log("storedUser: ",storedUser)
-      if (storedUser && checkTokenExpire.accessToken) {
+      if (storedUser ) {
         state.isAuthenticated = true;
         state.userData = JSON.parse(storedUser);
         state.accessToken = checkTokenExpire.accessToken;
