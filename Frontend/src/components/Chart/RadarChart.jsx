@@ -77,7 +77,7 @@ const RadarChart = ({ AllDataofIncomeExpenses }) => {
     // <div className=" sm:w-[60%] rounded-3xl px-3 py-5 mx-5 shadow-2xl transition-all duration-500 hover:scale-105 animate__animated animate__fadeIn">
     //   <Radar data={data} options={options} />
     // </div>
-    <div className="w-full sm:w-[60%] rounded-3xl px-4 sm:px-6 py-6 mx-auto my-5 shadow-2xl transition-all duration-500 hover:scale-105 animate__animated animate__fadeIn">
+    <div className="w-full bg-white sm:w-[60%] rounded-3xl px-4 sm:px-6 py-6 mx-auto my-5 shadow-2xl transition-all duration-500 hover:scale-105 animate__animated animate__fadeIn">
       <Radar data={data} options={options} />
     </div>
   );

@@ -137,18 +137,21 @@ function Chart() {
   );
 
   return (
-    <div className="my-4 md:w-[70%]">
-      <div className="w-full sm:w-[80%] lg:w-[100%] max-w-[1200px] mx-auto rounded-3xl px-3 sm:px-5 py-5 my-5 shadow-2xl transition-all duration-500 hover:scale-105 animate__animated animate__fadeIn">
+    <div 
+    // className="my-4 md:w-[70%]"
+    className="bg-gradient-to-r from-blue-50 to-green-100 min-h-screen py-6 px-4 md:px-10"
+    >
+      <div className="w-full bg-white sm:w-[80%] lg:w-[100%] max-w-[1200px] mx-auto rounded-3xl px-3 sm:px-5 py-5 my-5 shadow-2xl transition-all duration-500 hover:scale-105 animate__animated animate__fadeIn">
       
         <LineChart AllDataofIncomeExpenses={AllDataofIncomeExpenses} />
       </div>
 
-      <div className="flex w-[100%] flex-col sm:flex-row gap-4 md:gap-8">
+      <div className="flex  w-[100%] flex-col sm:flex-row gap-4 md:gap-8">
         <PieChart AllDataofIncomeExpenses={AllDataofIncomeExpenses} />
         <RadarChart AllDataofIncomeExpenses={AllDataofIncomeExpenses} />
       </div>
 
-      <div className="w-full sm:w-[80%] lg:w-[100%] max-w-[1200px] mx-auto rounded-3xl px-3 sm:px-5 py-5 my-5 shadow-2xl transition-all duration-500 hover:scale-105 animate__animated animate__fadeIn">
+      <div className="w-full bg-white sm:w-[80%] lg:w-[100%] max-w-[1200px] mx-auto rounded-3xl px-3 sm:px-5 py-5 my-5 shadow-2xl transition-all duration-500 hover:scale-105 animate__animated animate__fadeIn">
         <BarChart AllDataofIncomeExpenses={AllDataofIncomeExpenses} />
       </div>
     </div>

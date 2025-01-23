@@ -4,8 +4,8 @@ const apiSlice = createSlice({
   name: "ExpensesANDIncomeAPICallData",
   initialState: {
     ShowGraph_notList: true,
-    ExpensesData: "",
-    IncomeData: null,
+    ExpensesData:[],
+    IncomeData:[],
     newIncomeUpdate: false,
     newExpenseUpdate: false,
     TotalIncome:0,
