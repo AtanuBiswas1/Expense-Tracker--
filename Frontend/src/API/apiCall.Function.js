@@ -5,7 +5,7 @@ import {
   addExpenceUrl,
   addIncomeUrl,
   showExpensesUrl,
-  showIncomeUrl
+  showIncomeUrl,
 } from "../constant.API_URL.js";
 
 async function signupFunction(userGivenDataForSignup, setResponceData) {
@@ -37,84 +37,78 @@ async function loginFunction(userGivenDataForLogin, setLoginMessage) {
     });
     const responceAfterLogin = await responce.json();
     setLoginMessage(responceAfterLogin.message);
-    console.log(responceAfterLogin)
+    console.log(responceAfterLogin);
+
     if (responceAfterLogin.success) {
+      const accessToken = responceAfterLogin.data.accessToken;
+
+      // Set cookie for 24 hours
+      const expiryDate = new Date();
+      expiryDate.setTime(expiryDate.getTime() + 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+
+      document.cookie = `accessToken=${accessToken}; expires=${expiryDate.toUTCString()}; path=/`;
 
       localStorage.setItem(
         "afterLoginUserDataInLocalStore",
         JSON.stringify(responceAfterLogin)
       );
-      console.log("success but not...")
+      console.log("success but not...");
     }
   } catch (error) {
     console.log("Login Error  ", error);
   }
 }
 
+async function ExpenceApiCall(date = "", month = "", year = "") {
+  const data = {
+    date,
+    month,
+    year,
+  };
 
-async function ExpenceApiCall(date="",month="",year="") {
-    const data={
-        date,
-        month,
-        year
-       
-      }
-      
-      const params = new URLSearchParams(data);
-      const newShowExpensesUrl=showExpensesUrl+`?${params.toString()}`
-    try {
-        const responce = await fetch(newShowExpensesUrl, {
-            method: "GET",
-            credentials: "include", // Send cookies in cross-origin requests
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          const responceAfterLogin = await responce.json();
-          //console.log("line no 72",responceAfterLogin);
-          return responceAfterLogin
-    } catch (error) {
-        console.log("Login Error  ", error);
-        return error
-    }
-}
-
-async function IncomeApiCall(date="",month="",year="") {
-  const data={
-      date,
-      month,
-      year
-    }
-    
-    const params = new URLSearchParams(data);
-    const newShowIncomeUrl=showIncomeUrl+`?${params.toString()}`
+  const params = new URLSearchParams(data);
+  const newShowExpensesUrl = showExpensesUrl + `?${params.toString()}`;
   try {
-      const responce = await fetch(newShowIncomeUrl, {
-          method: "GET",
-          credentials: "include", // Send cookies in cross-origin requests
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const responceAfterLogin = await responce.json();
-        //console.log("line no 72",responceAfterLogin);
-        return responceAfterLogin
+    const responce = await fetch(newShowExpensesUrl, {
+      method: "GET",
+      credentials: "include", // Send cookies in cross-origin requests
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const responceAfterLogin = await responce.json();
+    //console.log("line no 72",responceAfterLogin);
+    return responceAfterLogin;
   } catch (error) {
-      console.log("Login Error  ", error);
-      return error
+    console.log("Login Error  ", error);
+    return error;
   }
 }
 
+async function IncomeApiCall(date = "", month = "", year = "") {
+  const data = {
+    date,
+    month,
+    year,
+  };
 
+  const params = new URLSearchParams(data);
+  const newShowIncomeUrl = showIncomeUrl + `?${params.toString()}`;
+  try {
+    const responce = await fetch(newShowIncomeUrl, {
+      method: "GET",
+      credentials: "include", // Send cookies in cross-origin requests
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const responceAfterLogin = await responce.json();
+    //console.log("line no 72",responceAfterLogin);
+    return responceAfterLogin;
+  } catch (error) {
+    console.log("Login Error  ", error);
+    return error;
+  }
+}
 
-
-
-
-
-
-
-
-
-
-
-export { signupFunction, loginFunction,ExpenceApiCall,IncomeApiCall };
+export { signupFunction, loginFunction, ExpenceApiCall, IncomeApiCall };

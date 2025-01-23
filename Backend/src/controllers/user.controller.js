@@ -129,7 +129,7 @@ const loginUser = asyncHandaler(async (req, resp) => {
 
   return resp
     .status(200)
-    .cookie("accessToken", accessToken, option) // set cookie
+    // .cookie("accessToken", accessToken, option) // set cookie
     .json(
       // send data in cookie from backend to frontend
       new ApiResponce(
