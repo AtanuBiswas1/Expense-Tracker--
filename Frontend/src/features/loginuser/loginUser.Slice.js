@@ -14,15 +14,11 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      // when do logout then  work this
       state.isAuthenticated = false;
       state.userData = null;
       localStorage.removeItem("afterLoginUserDataInLocalStore"); // Remove from local storage on logout
     },
-    // setUserData:(state,action)=>{
-    //     state.isAuthenticated=true;
-    //     state.userData=action.payload;
-    // },
+    
     checkAuth: (state) => {
       function getCookieObject() {
         const cookieString = document.cookie;
@@ -43,7 +39,7 @@ const authSlice = createSlice({
       }
       const storedUser = localStorage.getItem("afterLoginUserDataInLocalStore");
       
-      console.log("storedUser: ",storedUser)
+      //console.log("storedUser: ",storedUser)
       if (storedUser ) {
         state.isAuthenticated = true;
         state.userData = JSON.parse(storedUser);

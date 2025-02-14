@@ -11,11 +11,8 @@ function Moneyshowsection() {
   const { TotalIncome, TotalExpense } = useSelector(
     (state) => state.ExpensesANDIncomeAPICallData
   );
-  // const totalBal=0
-  // if(TotalExpense==0 || TotalIncome==0){
-  //   totalBal=To
-  // }
-  console.log(TotalIncome, TotalExpense);
+  
+  //console.log(TotalIncome, TotalExpense);
 
   const ClickAddIncomeBtn = () => {
     setAddIncome(true);

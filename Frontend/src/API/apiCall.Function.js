@@ -8,6 +8,8 @@ import {
   showIncomeUrl,
 } from "../constant.API_URL.js";
 
+
+
 async function signupFunction(userGivenDataForSignup, setResponceData) {
   try {
     let responce = await fetch(signupUrl, {
@@ -35,24 +37,28 @@ async function loginFunction(userGivenDataForLogin, setLoginMessage) {
       },
       body: JSON.stringify(userGivenDataForLogin),
     });
+    
     const responceAfterLogin = await responce.json();
     setLoginMessage(responceAfterLogin.message);
-    console.log(responceAfterLogin);
+    console.log("responceAfterLogin   ====>",responceAfterLogin);
 
     if (responceAfterLogin.success) {
       const accessToken = responceAfterLogin.data.accessToken;
-
+      console.log(accessToken)
       // Set cookie for 24 hours
       const expiryDate = new Date();
       expiryDate.setTime(expiryDate.getTime() + 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+       
+      //document.cookie = `accessToken=${accessToken}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
+      //document.cookie = `accessToken=${accessToken}; expires=${expiryDate.toUTCString()}; path=/`;
+      document.cookie = `accessToken=${accessToken}; expires=${expiryDate.toUTCString()}; path=/; Secure; SameSite=Strict`;
 
-      document.cookie = `accessToken=${accessToken}; expires=${expiryDate.toUTCString()}; path=/`;
 
       localStorage.setItem(
         "afterLoginUserDataInLocalStore",
         JSON.stringify(responceAfterLogin)
       );
-      console.log("success but not...");
+      
     }
   } catch (error) {
     console.log("Login Error  ", error);
@@ -65,7 +71,8 @@ async function ExpenceApiCall(date = "", month = "", year = "") {
     month,
     year,
   };
-
+  
+  const token = document.cookie;
   const params = new URLSearchParams(data);
   const newShowExpensesUrl = showExpensesUrl + `?${params.toString()}`;
   try {
@@ -74,6 +81,7 @@ async function ExpenceApiCall(date = "", month = "", year = "") {
       credentials: "include", // Send cookies in cross-origin requests
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     });
     const responceAfterLogin = await responce.json();
@@ -92,6 +100,7 @@ async function IncomeApiCall(date = "", month = "", year = "") {
     year,
   };
 
+  const token = document.cookie;
   const params = new URLSearchParams(data);
   const newShowIncomeUrl = showIncomeUrl + `?${params.toString()}`;
   try {
@@ -100,6 +109,7 @@ async function IncomeApiCall(date = "", month = "", year = "") {
       credentials: "include", // Send cookies in cross-origin requests
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     });
     const responceAfterLogin = await responce.json();
