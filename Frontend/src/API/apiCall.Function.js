@@ -73,6 +73,7 @@ async function ExpenceApiCall(date = "", month = "", year = "") {
   };
   
   const token = document.cookie;
+  console.log("token")
   const params = new URLSearchParams(data);
   const newShowExpensesUrl = showExpensesUrl + `?${params.toString()}`;
   try {
