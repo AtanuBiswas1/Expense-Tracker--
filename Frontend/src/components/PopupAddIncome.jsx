@@ -11,19 +11,28 @@ function PopupAddIncome({ setAddIncome }) {
   const { register, handleSubmit } = useForm();
   const dispatch = useDispatch();
   async function submitData(data) {
+    const getCookie = (name) => {
+      return document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(name + "="))
+        ?.split("=")[1];
+    };
+  
+    const token = getCookie("accessToken"); 
     try {
       const responce = await fetch(addIncomeUrl, {
         method: "POST",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });
       const responceAfterAddIncome = await responce.json();
       console.log(responceAfterAddIncome);
     } catch (error) {
-      console.log(error);
+      console.log("AddIncome error--->:",error);
     }
     data ? setAddIncome(false) : null;
     dispatch(UpdateIncomeData())

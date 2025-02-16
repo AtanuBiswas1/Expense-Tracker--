@@ -9,14 +9,27 @@ function PopupAddExpence({ setAddExpense }) {
   const { register, handleSubmit } = useForm();
   const dispatch = useDispatch();
   async function submitData(data) {
-    const responce = await fetch(addExpenceUrl, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    const getCookie = (name) => {
+      return document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(name + "="))
+        ?.split("=")[1];
+    };
+  
+    const token = getCookie("accessToken"); 
+    try {
+      const responce = await fetch(addExpenceUrl, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      console.log("AddExpence error--->:",error);
+    }
     data ? setAddExpense(false) : null;
     dispatch(UpdateExpenseDate());
   }
