@@ -68,8 +68,16 @@ async function ExpenceApiCall(date = "", month = "", year = "") {
     year,
   };
 
-  const token = document.cookie;
-  console.log("token:", token);
+  const getCookie = (name) => {
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="))
+      ?.split("=")[1];
+  };
+
+  const token = getCookie("accessToken"); // Get only accessToken
+  console.log("apicall.function.js--->token:", token);
+  
   const params = new URLSearchParams(data);
   const newShowExpensesUrl = showExpensesUrl + `?${params.toString()}`;
   try {
@@ -97,8 +105,16 @@ async function IncomeApiCall(date = "", month = "", year = "") {
     year,
   };
 
-  const token = document.cookie;
-  console.log("token:", token);
+  const getCookie = (name) => {
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="))
+      ?.split("=")[1];
+  };
+
+  const token = getCookie("accessToken"); // Get only accessToken
+  console.log("apicall.function.js--->token:", token);
+
   const params = new URLSearchParams(data);
   const newShowIncomeUrl = showIncomeUrl + `?${params.toString()}`;
   try {
