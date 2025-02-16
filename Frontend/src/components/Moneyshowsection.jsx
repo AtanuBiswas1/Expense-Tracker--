@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import MoneyCard from "./MoneyCard";
 import PopupAddIncome from "./PopupAddIncome";
 import PopupAddExpense from "./PopupAddExpence";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector} from "react-redux";
 
 function Moneyshowsection() {
   const [addIncome, setAddIncome] = useState(false);
@@ -12,7 +12,7 @@ function Moneyshowsection() {
     (state) => state.ExpensesANDIncomeAPICallData
   );
   
-  //console.log(TotalIncome, TotalExpense);
+  console.log("Moneyshowsection-->",TotalIncome, TotalExpense);
 
   const ClickAddIncomeBtn = () => {
     setAddIncome(true);
@@ -23,56 +23,7 @@ function Moneyshowsection() {
     setAddIncome(false);
   };
   return (
-    // <>
-    //   <div className="flex gap-3">
-    //     <MoneyCard titel="Total Balence" totalBal={TotalIncome + TotalExpense} />
-    //     <MoneyCard
-    //       titel=" Total Income Balence"
-    //       totalBal={TotalIncome}
-    //       bgColor="bg-blue-900"
-    //     />
-    //     <MoneyCard
-    //       titel="Total Expense"
-    //       totalBal={TotalExpense}
-    //       bgColor="bg-yellow-900"
-    //     />
-    //     <div>
-    //       <button
-    //         className="p-3 bg-green-500 m-3 mt-8 rounded-xl"
-    //         onClick={ClickAddIncomeBtn}
-    //       >
-    //         Add Income
-    //       </button>
-    //       <button
-    //         className="p-3 bg-red-500 m-3 mt-8 rounded-xl"
-    //         onClick={ClickAddExpense}
-    //       >
-    //         Add Expense
-    //       </button>
-    //     </div>
-    //   </div>
-    //   {!addIncome ? (
-    //     ""
-    //   ) : (
-    //     <div
-    //       className={`w-full h-full items-center p-3 flex justify-around z-10 absolute top-0 bg-customBackgroundColorBlack }`}
-    //     >
-    //       {addIncome ? <PopupAddIncome setAddIncome={setAddIncome} /> : null}
-    //     </div>
-    //   )}
-    //   {!addExpense ? (
-    //     ""
-    //   ) : (
-    //     <div
-    //       className={`w-full h-full p-3 flex justify-around z-10 absolute top-0 bg-customBackgroundColorBlack }`}
-    //     >
-    //       {addExpense ? (
-    //         <PopupAddExpense setAddExpense={setAddExpense} />
-    //       ) : null}
-    //     </div>
-    //   )}
-
-    // </>
+    
     <>
       <div className="flex flex-wrap gap-6 justify-center">
         <MoneyCard

@@ -21,51 +21,6 @@ function PopupAddExpence({ setAddExpense }) {
     dispatch(UpdateExpenseDate());
   }
   return (
-    // <div>
-    //   <div className=" shadow-2xl  w-[100%] rounded-xl p-3 font-bold bg-white ">
-    //     <h1>Add Money</h1>
-    //     <div>
-    //       <form onSubmit={handleSubmit(submitData)}>
-    //         <Input
-    //           label="Expence Amount : "
-    //           type="number"
-    //           {...register("amount", { required: true })}
-    //         />
-    //         <Input
-    //           label="Category"
-    //           placeholder="Food/ tour / marker / gym / buy other "
-    //           {...register("category", { required: true })}
-    //         />
-    //         <Input
-    //           label="Description"
-    //           placeholder=""
-    //           {...register("description")}
-    //         />
-    //         <Input
-    //           label="Expence Date"
-    //           type="date"
-    //           placeholder=""
-    //           {...register("date", { required: true })}
-    //         />
-    //         <div className="text-right">
-    //           <button
-    //             onClick={() => setAddExpense(false)}
-    //             className="p-3 bg-red-500 m-3 mt-8 rounded-xl w-24 font-serif"
-    //           >
-    //             Cancle
-    //           </button>
-    //           <button
-    //             type="submit"
-    //             className="p-3 bg-green-500 m-3 mt-8 rounded-xl w-24 font-serif"
-    //           >
-    //             Add
-    //           </button>
-    //         </div>
-    //       </form>
-    //     </div>
-    //   </div>
-    // </div>
-
     <div className="shadow-2xl w-full sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3 max-h-[90vh] overflow-y-auto rounded-xl p-6 bg-white transform transition-transform duration-500 ease-in-out hover:scale-105 hover:shadow-3xl">
       <h1 className="text-2xl text-center font-extrabold text-gray-700 mb-6">
         Add Expense

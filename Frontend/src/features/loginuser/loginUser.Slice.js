@@ -16,13 +16,14 @@ const authSlice = createSlice({
     logout: (state) => {
       state.isAuthenticated = false;
       state.userData = null;
+      document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; Secure; SameSite=Strict";
       localStorage.removeItem("afterLoginUserDataInLocalStore"); // Remove from local storage on logout
     },
     
     checkAuth: (state) => {
       function getCookieObject() {
         const cookieString = document.cookie;
-       // console.log("cookieString: ",cookieString)
+        console.log("loginUser.slice.js--->cookieString: ",cookieString)
         const cookieArray = cookieString.split("; ");
         const cookieObject = {};
 
@@ -30,7 +31,7 @@ const authSlice = createSlice({
           const [key, value] = cookie.split("=");
           cookieObject[key] = value;
         });
-        //console.log("cookieObject: ",cookieObject)
+        console.log("loginUser.slice.js--->cookieObject: ",cookieObject)
         return cookieObject;
       }
       const checkTokenExpire = getCookieObject();
@@ -39,7 +40,7 @@ const authSlice = createSlice({
       }
       const storedUser = localStorage.getItem("afterLoginUserDataInLocalStore");
       
-      //console.log("storedUser: ",storedUser)
+      console.log("loginUser.slice.js--->storedUser: ",storedUser)
       if (storedUser ) {
         state.isAuthenticated = true;
         state.userData = JSON.parse(storedUser);

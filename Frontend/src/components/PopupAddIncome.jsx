@@ -31,38 +31,6 @@ function PopupAddIncome({ setAddIncome }) {
 
   
   return (
-    // <div className="bg-slate-400 rounded-xl">
-    //   <div className="shadow-2xl  w-[100%] rounded-xl p-3 font-bold ">
-    //     <h1>Add Money</h1>
-    //     <div>
-    //       <form onSubmit={handleSubmit(submitData)}>
-    //         <Input
-    //           label="Total Amount"
-    //           type="number"
-    //           {...register("amount", { required: true })}
-    //         />
-    //         <Input
-    //           label="Come where"
-    //           {...register("category", { required: true })}
-    //         />
-    //         <div className="text-right">
-    //           <button
-    //             onClick={() => setAddIncome(false)}
-    //             className="p-3 bg-red-500 m-3 mt-8 rounded-xl w-24 font-serif"
-    //           >
-    //             Cancle
-    //           </button>
-    //           <button
-    //             type="submit"
-    //             className="p-3 bg-green-500 m-3 mt-8 rounded-xl w-24 font-serif"
-    //           >
-    //             Add
-    //           </button>
-    //         </div>
-    //       </form>
-    //     </div>
-    //   </div>
-    // </div>
     <div
   className="shadow-2xl w-full sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-1/3 max-h-[90vh] overflow-y-auto rounded-xl p-6 bg-white transform transition-transform duration-500 ease-in-out hover:scale-105 hover:shadow-3xl"
 >
