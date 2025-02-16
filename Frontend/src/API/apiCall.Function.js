@@ -44,7 +44,7 @@ async function loginFunction(userGivenDataForLogin, setLoginMessage) {
 
     if (responceAfterLogin.success) {
       const accessToken = responceAfterLogin.data.accessToken;
-      console.log(accessToken)
+      console.log("accessToken", accessToken)
       // Set cookie for 24 hours
       const expiryDate = new Date();
       expiryDate.setTime(expiryDate.getTime() + 24 * 60 * 60 * 1000); // 24 hours in milliseconds
@@ -73,7 +73,7 @@ async function ExpenceApiCall(date = "", month = "", year = "") {
   };
   
   const token = document.cookie;
-  console.log("token")
+  console.log("token:", token)
   const params = new URLSearchParams(data);
   const newShowExpensesUrl = showExpensesUrl + `?${params.toString()}`;
   try {
@@ -102,6 +102,7 @@ async function IncomeApiCall(date = "", month = "", year = "") {
   };
 
   const token = document.cookie;
+  console.log("token:", token)
   const params = new URLSearchParams(data);
   const newShowIncomeUrl = showIncomeUrl + `?${params.toString()}`;
   try {

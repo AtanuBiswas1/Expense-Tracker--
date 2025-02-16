@@ -22,7 +22,7 @@ const authSlice = createSlice({
     checkAuth: (state) => {
       function getCookieObject() {
         const cookieString = document.cookie;
-        console.log("cookieString: ",cookieString)
+       // console.log("cookieString: ",cookieString)
         const cookieArray = cookieString.split("; ");
         const cookieObject = {};
 
@@ -30,7 +30,7 @@ const authSlice = createSlice({
           const [key, value] = cookie.split("=");
           cookieObject[key] = value;
         });
-        console.log("cookieObject: ",cookieObject)
+        //console.log("cookieObject: ",cookieObject)
         return cookieObject;
       }
       const checkTokenExpire = getCookieObject();
