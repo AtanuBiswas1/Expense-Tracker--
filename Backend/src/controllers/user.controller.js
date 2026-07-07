@@ -26,20 +26,20 @@ const registerUser = asyncHandaler(async (req, resp) => {
   const { userName, email, password } = req.body;
   //console.log({userName})
 
-  if (userName === "") {
+  if (!userName || userName.trim() === "") {
     throw new ApiError(400, "User Name is required !!");
   }
-  if (email === "") {
+  if (!email || email.trim() === "") {
     //throw new ApiError(400, "Email ID is required !!");
     console.log(new ApiError(400, "Email ID is required !!"));
     return resp
-      .status(409)
+      .status(400)
       .json(new ApiResponce(400, "", "Email ID is required !!"));
   }
-  if (password === "") {
+  if (!password || password.trim() === "") {
     console.log(new ApiError(400, "Password is required !!"));
     return resp
-      .status(409)
+      .status(400)
       .json(new ApiResponce(400, "", "Password is required !!"));
   }
   const existedUser = await User.findOne({ email });

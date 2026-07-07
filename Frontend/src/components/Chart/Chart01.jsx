@@ -4,7 +4,6 @@ import { ExpenceApiCall, IncomeApiCall } from "../../API/apiCall.Function.js";
 import BarChart from "./BarChart.jsx";
 import PieChart from "./PieChart.jsx";
 import LineChart from "./LineChart.jsx";
-import RadarChart from "./RadarChart.jsx";
 import { useDispatch } from "react-redux";
 import {
   setTotalIncome,
@@ -12,147 +11,150 @@ import {
 } from "../../features/apiDate/apiData.Slice.js";
 
 function Chart() {
-  const [monthlyExpensesData, setMonthlyExpensesData] = useState([]);
-  const [monthlyIncomesData, setMonthlyIncomessData] = useState([]);
-  const [selectedmonth, setMonth] = useState("");
+  const [rawExpenses, setRawExpenses] = useState([]);
+  const [rawIncomes, setRawIncomes] = useState([]);
+  const [groupingBasis, setGroupingBasis] = useState("days"); // "days" | "month" | "year"
   const dispatch = useDispatch();
 
-  const Months = [
-    "Select",
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "July",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-
-  // Fetch data from backend
+  // Fetch all data from backend (no date/month/year query filters, to get complete history)
   const fetchDataForExpenses = async () => {
-    const response = await ExpenceApiCall("", selectedmonth, 2025);
-    const ExpensesData = await response?.data?.Expenses;
-    if (response) {
-      dispatch(setTotalExpense(response.message.TotalExpence));
+    try {
+      const response = await ExpenceApiCall("", "", "");
+      const ExpensesData = response?.data?.Expenses || [];
+      if (response && response.message) {
+        dispatch(setTotalExpense(response.message.TotalExpence || 0));
+      }
+      setRawExpenses(ExpensesData);
+    } catch (error) {
+      console.error("Error fetching expenses for chart:", error);
     }
-    // Process data for monthly and yearly
-    const groupedByMonth = ExpensesData.reduce((acc, expense) => {
-      const month = format(new Date(expense.date), "yyyy-MM");
-      acc[month] = (acc[month] || 0) + expense.amount;
-      return acc;
-    }, {});
-
-    setMonthlyExpensesData(
-      Object.entries(groupedByMonth).map(([key, value]) => ({
-        month: key,
-        amount: value,
-      }))
-    );
   };
 
   const fetchDataForIncome = async () => {
-    const response = await IncomeApiCall("", selectedmonth, 2025);
-    const IncomesData = await response?.data?.Income;
-    if (response) {
-      dispatch(setTotalIncome(response?.message?.TotalIncome));
+    try {
+      const response = await IncomeApiCall("", "", "");
+      const IncomesData = response?.data?.Income || [];
+      if (response && response.message) {
+        dispatch(setTotalIncome(response?.message?.TotalIncome || 0));
+      }
+      setRawIncomes(IncomesData);
+    } catch (error) {
+      console.error("Error fetching income for chart:", error);
     }
-    // Process data for monthly and yearly
-    const groupedByMonth = IncomesData.reduce((acc, Income) => {
-      const month = format(new Date(Income.createdAt), "yyyy-MM");
-      acc[month] = (acc[month] || 0) + Income.amount;
-      return acc;
-    }, {});
-
-    setMonthlyIncomessData(
-      Object.entries(groupedByMonth).map(([key, value]) => ({
-        month: key,
-        amount: value,
-      }))
-    );
   };
 
   useEffect(() => {
     fetchDataForExpenses();
     fetchDataForIncome();
-  }, [selectedmonth]);
+  }, []);
 
-  // Generate sequential months from start to end
-  const generateMonths = (start, end) => {
-    const months = [];
-    const startDate = new Date(`${start}-01`);
-    const endDate = new Date(`${end}-01`);
-    while (startDate <= endDate) {
-      const year = startDate.getFullYear();
-      const month = String(startDate.getMonth() + 1).padStart(2, "0");
-      months.push(`${year}-${month}`);
-      startDate.setMonth(startDate.getMonth() + 1);
-    }
-    return months;
-  };
+  // Aggregation logic on client-side
+  const getAggregatedData = () => {
+    const formatKey = (dateVal) => {
+      if (!dateVal) return "";
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return "";
 
-  // Merge and group data
-  const mergeData = (incomeData, expensesData, allMonths) => {
-    const combinedData = [
-      ...incomeData.map((item) => ({ ...item, type: "income" })),
-      ...expensesData.map((item) => ({ ...item, type: "expenses" })),
-    ];
-
-    const groupedData = combinedData.reduce((acc, item) => {
-      const { month, amount, type } = item;
-      if (!acc[month]) {
-        acc[month] = { month, income: 0, expenses: 0 };
+      if (groupingBasis === "days") {
+        return format(d, "yyyy-MM-dd");
+      } else if (groupingBasis === "month") {
+        return format(d, "yyyy-MM");
+      } else {
+        return format(d, "yyyy");
       }
-      acc[month][type] += amount;
-      return acc;
-    }, {});
+    };
 
-    // Ensure all months are present with default values
-    return allMonths.map(
-      (month) => groupedData[month] || { month, income: 0, expenses: 0 }
-    );
+    const grouped = {};
+
+    rawExpenses.forEach((item) => {
+      const key = formatKey(item.date || item.createdAt);
+      if (!key) return;
+      if (!grouped[key]) {
+        grouped[key] = { key, income: 0, expenses: 0 };
+      }
+      grouped[key].expenses += item.amount || 0;
+    });
+
+    rawIncomes.forEach((item) => {
+      const key = formatKey(item.date || item.createdAt);
+      if (!key) return;
+      if (!grouped[key]) {
+        grouped[key] = { key, income: 0, expenses: 0 };
+      }
+      grouped[key].income += item.amount || 0;
+    });
+
+    const dataArray = Object.values(grouped);
+    
+    // Sort chronologically
+    dataArray.sort((a, b) => a.key.localeCompare(b.key));
+
+    // Format output display labels and return
+    return dataArray
+      .filter((item) => item.income !== 0 || item.expenses !== 0)
+      .map((item) => {
+        let displayLabel = item.key;
+        try {
+          if (groupingBasis === "days") {
+            const d = new Date(item.key + "T00:00:00");
+            displayLabel = format(d, "dd MMM yyyy");
+          } else if (groupingBasis === "month") {
+            const parts = item.key.split("-");
+            const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, 1);
+            displayLabel = format(d, "MMM yyyy");
+          }
+        } catch (e) {
+          console.error("Error formatting date label:", e);
+        }
+
+        return {
+          month: displayLabel, // Keep property as 'month' to prevent breaking chart label mapping
+          income: item.income,
+          expenses: item.expenses,
+        };
+      });
   };
 
-  // Define the date range
-  const startMonth = "2024-01";
-  const currentDate = new Date();
-  const endMonth = `${currentDate.getFullYear()}-${String(
-    currentDate.getMonth() + 1
-  ).padStart(2, "0")}`;
-
-  // Generate all months from start to current month
-  const allMonths = generateMonths(startMonth, endMonth);
-
-  let AllDataofIncomeExpenses = mergeData(
-    monthlyIncomesData,
-    monthlyExpensesData,
-    allMonths
-  );
-  AllDataofIncomeExpenses = AllDataofIncomeExpenses.filter(
-    (item) => item.income !== 0 || item.expenses !== 0
-  );
+  const AllDataofIncomeExpenses = getAggregatedData();
 
   return (
-    <div 
-    // className="my-4 md:w-[70%]"
-    className="bg-gradient-to-r from-blue-50 to-green-100 min-h-screen py-6 px-4 md:px-10"
-    >
-      <div className="w-full bg-white sm:w-[80%] lg:w-[100%] max-w-[1200px] mx-auto rounded-3xl px-3 sm:px-5 py-5 my-5 shadow-2xl transition-all duration-500 hover:scale-105 animate__animated animate__fadeIn">
-      
-        <LineChart AllDataofIncomeExpenses={AllDataofIncomeExpenses} />
+    <div className="max-w-[1200px] mx-auto px-4 py-8 space-y-8">
+      {/* Header section with view toggle */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">Analytics & Trends</h2>
+          <p className="text-sm text-slate-500">Visual representations of your balance, income, and expenditures</p>
+        </div>
+        
+        {/* Dropdown Selector */}
+        <div className="flex items-center gap-3 bg-white border border-slate-200 px-4 py-2.5 rounded-xl shadow-sm">
+          <label htmlFor="groupingBasis" className="text-slate-500 text-xs font-semibold uppercase tracking-wider">
+            View By:
+          </label>
+          <select
+            id="groupingBasis"
+            value={groupingBasis}
+            className="bg-transparent text-slate-700 font-semibold text-sm outline-none cursor-pointer"
+            onChange={(e) => setGroupingBasis(e.target.value)}
+          >
+            <option value="days" className="bg-white text-slate-800">Days</option>
+            <option value="month" className="bg-white text-slate-800">Month</option>
+            <option value="year" className="bg-white text-slate-800">Year</option>
+          </select>
+        </div>
       </div>
 
-      <div className="flex  w-[100%] flex-col sm:flex-row gap-4 md:gap-8">
+      {/* Charts */}
+      <div className="w-full bg-white border border-slate-200/80 rounded-3xl p-6 shadow-md transition-all duration-300 hover:border-slate-300/80">
+        <LineChart AllDataofIncomeExpenses={AllDataofIncomeExpenses} groupingBasis={groupingBasis} />
+      </div>
+
+      <div className="flex justify-center">
         <PieChart AllDataofIncomeExpenses={AllDataofIncomeExpenses} />
-        <RadarChart AllDataofIncomeExpenses={AllDataofIncomeExpenses} />
       </div>
 
-      <div className="w-full bg-white sm:w-[80%] lg:w-[100%] max-w-[1200px] mx-auto rounded-3xl px-3 sm:px-5 py-5 my-5 shadow-2xl transition-all duration-500 hover:scale-105 animate__animated animate__fadeIn">
-        <BarChart AllDataofIncomeExpenses={AllDataofIncomeExpenses} />
+      <div className="w-full bg-white border border-slate-200/80 rounded-3xl p-6 shadow-md transition-all duration-300 hover:border-slate-300/80">
+        <BarChart AllDataofIncomeExpenses={AllDataofIncomeExpenses} groupingBasis={groupingBasis} />
       </div>
     </div>
   );

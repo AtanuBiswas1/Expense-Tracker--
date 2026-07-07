@@ -6,6 +6,13 @@ import {
   addIncomeUrl,
   showExpensesUrl,
   showIncomeUrl,
+  aiAnalyzeUrl,
+  addBudgetLimitUrl,
+  showBudgetLimitsUrl,
+  addSavingsGoalUrl,
+  contributeSavingsGoalUrl,
+  showSavingsGoalsUrl,
+  deleteSavingsGoalUrl
 } from "../constant.API_URL.js";
 
 async function signupFunction(userGivenDataForSignup, setResponceData) {
@@ -76,8 +83,8 @@ async function ExpenceApiCall(date = "", month = "", year = "") {
   };
 
   const token = getCookie("accessToken"); // Get only accessToken
-  console.log("apicall.function.js--->token:", token);
-  
+
+
   const params = new URLSearchParams(data);
   const newShowExpensesUrl = showExpensesUrl + `?${params.toString()}`;
   try {
@@ -113,7 +120,7 @@ async function IncomeApiCall(date = "", month = "", year = "") {
   };
 
   const token = getCookie("accessToken"); // Get only accessToken
-  console.log("apicall.function.js--->token:", token);
+
 
   const params = new URLSearchParams(data);
   const newShowIncomeUrl = showIncomeUrl + `?${params.toString()}`;
@@ -135,4 +142,192 @@ async function IncomeApiCall(date = "", month = "", year = "") {
   }
 }
 
-export { signupFunction, loginFunction, ExpenceApiCall, IncomeApiCall };
+async function aiAnalyzeApiCall(question = "") {
+  const getCookie = (name) => {
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="))
+      ?.split("=")[1];
+  };
+
+  const token = getCookie("accessToken");
+
+  try {
+    const response = await fetch(aiAnalyzeUrl, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ question }),
+    });
+    const responseData = await response.json();
+    return responseData;
+  } catch (error) {
+    console.error("AI API Error:", error);
+    return error;
+  }
+}
+
+async function addBudgetLimitApiCall(category, limit) {
+  const getCookie = (name) => {
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="))
+      ?.split("=")[1];
+  };
+  const token = getCookie("accessToken");
+  try {
+    const response = await fetch(addBudgetLimitUrl, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ category, limit }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+async function fetchBudgetLimitsApiCall() {
+  const getCookie = (name) => {
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="))
+      ?.split("=")[1];
+  };
+  const token = getCookie("accessToken");
+  try {
+    const response = await fetch(showBudgetLimitsUrl, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+async function addSavingsGoalApiCall(title, targetAmount, currentAmount, category, targetDate) {
+  const getCookie = (name) => {
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="))
+      ?.split("=")[1];
+  };
+  const token = getCookie("accessToken");
+  try {
+    const response = await fetch(addSavingsGoalUrl, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ title, targetAmount, currentAmount, category, targetDate }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+async function contributeSavingsGoalApiCall(goalId, amount) {
+  const getCookie = (name) => {
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="))
+      ?.split("=")[1];
+  };
+  const token = getCookie("accessToken");
+  try {
+    const response = await fetch(contributeSavingsGoalUrl, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ goalId, amount }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+async function fetchSavingsGoalsApiCall() {
+  const getCookie = (name) => {
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="))
+      ?.split("=")[1];
+  };
+  const token = getCookie("accessToken");
+  try {
+    const response = await fetch(showSavingsGoalsUrl, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+async function deleteSavingsGoalApiCall(goalId) {
+  const getCookie = (name) => {
+    return document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="))
+      ?.split("=")[1];
+  };
+  const token = getCookie("accessToken");
+  try {
+    const response = await fetch(deleteSavingsGoalUrl, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ goalId }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+export { 
+  signupFunction, 
+  loginFunction, 
+  ExpenceApiCall, 
+  IncomeApiCall, 
+  aiAnalyzeApiCall,
+  addBudgetLimitApiCall,
+  fetchBudgetLimitsApiCall,
+  addSavingsGoalApiCall,
+  contributeSavingsGoalApiCall,
+  fetchSavingsGoalsApiCall,
+  deleteSavingsGoalApiCall
+};

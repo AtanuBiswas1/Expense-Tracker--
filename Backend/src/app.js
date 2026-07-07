@@ -11,10 +11,8 @@ app.get("/", (req, res) => {
   });
 
 app.use(cors({
-    //origin: "http://localhost:5173",
     origin: process.env.CORS_ORIGIN,
     credentials: true  // Allow credentials (cookies)
-   
 }))
 
 app.use(express.json())

@@ -225,8 +225,10 @@ import {
   ExpensesAPIData,
   IncomeAPIData,
 } from "../../features/apiDate/apiData.Slice.js";
+import { useToast } from "../../context/ToastContext.jsx";
 
 function List() {
+  const { addToast } = useToast();
   const Months = [
     "Select",
     "Jan",
@@ -260,24 +262,30 @@ function List() {
     try {
       const response = await ExpenceApiCall(selectedMonth, selectedYear);
       dispatch(ExpensesAPIData(response?.data?.Expenses));
+      if (response?.message && (response.data === " " || !response.data?.Expenses)) {
+        addToast(response.message, "warning");
+      }
     } catch (error) {
       console.error("Error fetching expenses data:", error);
     } finally {
       setLoading(false);
     }
-  }, [selectedMonth, selectedYear, dispatch]);
+  }, [selectedMonth, selectedYear, dispatch, addToast]);
 
   const fetchIncomeData = useCallback(async () => {
     setLoading(true);
     try {
       const response = await IncomeApiCall(selectedMonth, selectedYear);
       dispatch(IncomeAPIData(response?.data?.Income));
+      if (response?.message && (response.data === " " || !response.data?.Income)) {
+        addToast(response.message, "warning");
+      }
     } catch (error) {
       console.error("Error fetching income data:", error);
     } finally {
       setLoading(false);
     }
-  }, [selectedMonth, selectedYear, dispatch]);
+  }, [selectedMonth, selectedYear, dispatch, addToast]);
 
   useEffect(() => {
     fetchExpensesData();
@@ -331,104 +339,148 @@ function List() {
     if (!paginatedData.length) {
       return (
         <tr>
-          <td colSpan="5">No Data Found</td>
+          <td colSpan="4" className="py-12 text-center text-slate-500 font-medium">
+            No Data Found
+          </td>
         </tr>
       );
     }
-    return paginatedData.map((item, key) => (
-      <tr className="border-t border-gray-200" key={key}>
-        <td>
-          {new Date(item.date || item.createdAt).toLocaleDateString("en-GB")}
-        </td>
-        <td>{item.amount}</td>
-        <td>{item.status}</td>
-        <td>{item.description || item.category}</td>
-      </tr>
-    ));
-  }, [paginatedData]);
+    return paginatedData.map((item, key) => {
+      const isExpense = item.status?.toLowerCase().includes("exp") || !showIncomeTable;
+      return (
+        <tr className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors duration-200" key={key}>
+          <td className="py-4 px-6 text-slate-700 font-medium text-sm">
+            {new Date(item.date || item.createdAt).toLocaleDateString("en-GB", {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            })}
+          </td>
+          <td className={`py-4 px-6 font-semibold text-sm ${isExpense ? 'text-rose-600' : 'text-teal-600'}`}>
+            {isExpense ? '-' : '+'}${item.amount.toLocaleString()}
+          </td>
+          <td className="py-4 px-6 text-sm">
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+              isExpense 
+                ? 'bg-rose-50 border-rose-200/60 text-rose-600' 
+                : 'bg-teal-50 border-teal-200/60 text-teal-600'
+            }`}>
+              {item.status || (isExpense ? "Expense" : "Income")}
+            </span>
+          </td>
+          <td className="py-4 px-6 text-slate-500 text-sm max-w-[200px] truncate" title={item.description || item.category}>
+            {item.description || item.category || '—'}
+          </td>
+        </tr>
+      );
+    });
+  }, [paginatedData, showIncomeTable]);
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-green-100 min-h-screen py-6 px-4 md:px-10">
-      <div className="shadow-lg p-4 w-full flex flex-wrap justify-between items-center gap-4 bg-white rounded-lg">
-        <button
-          className="bg-green-500 text-white px-4 py-2 rounded-lg"
-          onClick={handleExpensesClick}
-        >
-          Expenses
-        </button>
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-          onClick={handleIncomeClick}
-        >
-          Income
-        </button>
-        <div className="flex flex-col items-start bg-slate-100 rounded-lg px-4 py-3 shadow-md">
-          <label htmlFor="month" className="text-gray-700 font-semibold mb-1">
-            Search by Month
-          </label>
-          <select
-            id="month"
-            value={selectedMonth}
-            className="bg-blue-500 text-white rounded-2xl px-3 py-2"
-            onChange={(event) => setMonth(Months.indexOf(event.target.value))}
+    <div className="max-w-[1200px] mx-auto px-4 py-6">
+      {/* Controls Section */}
+      <div className="bg-white border border-slate-200 p-6 rounded-2xl flex flex-wrap justify-between items-center gap-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <button
+            className={`px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 ${
+              !showIncomeTable
+                ? "bg-rose-600 text-white shadow-lg shadow-rose-600/10 font-bold"
+                : "bg-slate-100 text-slate-650 hover:text-slate-800 hover:bg-slate-200"
+            }`}
+            onClick={handleExpensesClick}
           >
-            {Months.map((month, key) => (
-              <option key={key} value={month}>
-                {month}
-              </option>
-            ))}
-          </select>
+            Expenses
+          </button>
+          <button
+            className={`px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 ${
+              showIncomeTable
+                ? "bg-teal-600 text-white shadow-lg shadow-teal-600/10 font-bold"
+                : "bg-slate-100 text-slate-650 hover:text-slate-800 hover:bg-slate-200"
+            }`}
+            onClick={handleIncomeClick}
+          >
+            Income
+          </button>
         </div>
-        <button
-          className="bg-yellow-500 text-white px-4 py-2 rounded-lg"
-          onClick={handleAllClick}
-        >
-          All
-        </button>
+
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl shadow-sm">
+            <label htmlFor="month" className="text-slate-500 text-xs font-semibold uppercase tracking-wider">
+              Filter by Month:
+            </label>
+            <select
+              id="month"
+              value={Months[selectedMonth] || "Select"}
+              className="bg-transparent text-slate-700 font-semibold text-sm outline-none cursor-pointer"
+              onChange={(event) => setMonth(Months.indexOf(event.target.value))}
+            >
+              {Months.map((month, key) => (
+                <option key={key} value={month} className="bg-white text-slate-800">
+                  {month}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <button
+            className="px-5 py-2 text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-200 transition-all duration-300"
+            onClick={handleAllClick}
+          >
+            Reset Filters
+          </button>
+        </div>
       </div>
 
-      <div className="mt-6 overflow-x-auto">
-        <table className="min-w-[600px] w-full border-collapse bg-white shadow-xl rounded-lg">
-          <thead>
-            <tr className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-lg">
-              <th className="py-3 px-6">Date</th>
-              <th className="py-3 px-6">Amount</th>
-              <th className="py-3 px-6">Status</th>
-              <th className="py-3 px-6">Description</th>
-            </tr>
-          </thead>
-          <tbody className="text-center bg-gray-50">
-            {loading ? (
-              <tr>
-                <td colSpan="5">Loading...</td>
+      {/* Table Section */}
+      <div className="mt-8 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-[600px] w-full border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-bold uppercase tracking-wider text-left">
+                <th className="py-4 px-6">Date</th>
+                <th className="py-4 px-6">Amount</th>
+                <th className="py-4 px-6">Status</th>
+                <th className="py-4 px-6">Description</th>
               </tr>
-            ) : (
-              tableRows
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {loading ? (
+                <tr>
+                  <td colSpan="4" className="py-12 text-center">
+                    <div className="flex justify-center items-center gap-3 text-slate-500 font-medium">
+                      <svg className="animate-spin h-5 w-5 text-teal-600" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      <span>Loading records...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                tableRows
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div className="flex justify-between mt-4">
+      {/* Pagination Section */}
+      <div className="flex justify-between items-center mt-6 px-2">
         <button
-          className="bg-gray-400 text-white px-3 py-2 rounded-lg"
+          className="flex items-center gap-2 bg-white hover:bg-slate-550/5 border border-slate-200 text-slate-600 disabled:opacity-35 disabled:hover:bg-white px-4 py-2.5 rounded-xl transition-all duration-300 text-sm font-semibold"
           onClick={() => handlePagination("prev")}
           disabled={currentPage === 1}
         >
-          Previous
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span>Previous</span>
         </button>
-        {/* <button
-          className="bg-gray-400 text-white px-3 py-2 rounded-lg"
-          onClick={() => handlePagination("next")}
-          disabled={
-            currentPage * itemsPerPage >=
-            (showIncomeTable ? IncomeData.length : ExpensesData.length)
-          }
-        >
-          Next
-        </button> */}
+        <span className="text-xs font-semibold text-slate-450 uppercase tracking-wider">
+          Page {currentPage}
+        </span>
         <button
-          className="bg-gray-400 text-white px-3 py-2 rounded-lg"
+          className="flex items-center gap-2 bg-white hover:bg-slate-550/5 border border-slate-200 text-slate-600 disabled:opacity-35 disabled:hover:bg-white px-4 py-2.5 rounded-xl transition-all duration-300 text-sm font-semibold"
           onClick={() => handlePagination("next")}
           disabled={
             currentPage * itemsPerPage >=
@@ -437,7 +489,10 @@ function List() {
               : ExpensesData?.length || 0)
           }
         >
-          Next
+          <span>Next</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
     </div>
