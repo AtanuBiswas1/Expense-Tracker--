@@ -144,8 +144,8 @@ function Dashbord() {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 ${
                   isTabActive 
-                    ? "bg-indigo-650 text-white shadow-md shadow-indigo-600/10" 
-                    : "text-slate-500 hover:text-slate-805 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-950"
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10" 
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-950"
                 }`}
               >
                 {item.icon}
@@ -173,7 +173,7 @@ function Dashbord() {
           </button>
         </div>
       </aside>
-
+ 
       {/* Main Content Area */}
       <main className="flex-1 p-6 overflow-y-auto max-w-full">
         <div className="max-w-6xl mx-auto space-y-6">
@@ -181,7 +181,7 @@ function Dashbord() {
           {/* Welcome Dashboard banner */}
           <div className="flex justify-between items-start no-print">
             <div>
-              <h2 className="text-xl font-black text-slate-850 dark:text-slate-100">
+              <h2 className="text-xl font-black text-slate-800 dark:text-slate-100">
                 Welcome back, {userData?.data?.user?.userName || "User"}
               </h2>
               <p className="text-xs text-slate-400 font-medium">

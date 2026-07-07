@@ -76,6 +76,7 @@ function DashboardView({ searchFilter = "" }) {
   const [incomes, setIncomes] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState("₹");
   const [totalBudgetLimit, setTotalBudgetLimit] = useState(200000);
+  const [isDark, setIsDark] = useState(document.documentElement.classList.contains("dark"));
 
   // Reload local state
   const loadLocalData = async () => {
@@ -169,9 +170,16 @@ function DashboardView({ searchFilter = "" }) {
     };
     window.addEventListener("currency-change", handleCurrency);
 
+    // Listen for theme change
+    const handleTheme = (e) => {
+      setIsDark(e.detail === "dark");
+    };
+    window.addEventListener("theme-change", handleTheme);
+
     return () => {
       window.removeEventListener("local-data-update", loadLocalData);
       window.removeEventListener("currency-change", handleCurrency);
+      window.removeEventListener("theme-change", handleTheme);
       cleanupCharts();
     };
   }, []);
@@ -473,13 +481,17 @@ function DashboardView({ searchFilter = "" }) {
     ]
   };
 
+  const tickColor = isDark ? "#94a3b8" : "#475569";
+  const gridColor = isDark ? "rgba(148, 163, 184, 0.08)" : "rgba(0, 0, 0, 0.05)";
+  const labelColor = isDark ? "#94a3b8" : "#475569";
+
   const lineChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { grid: { display: false }, ticks: { font: { size: 9 }, color: "#94a3b8" } },
-      y: { grid: { color: "rgba(148, 163, 184, 0.08)" }, ticks: { font: { size: 9 }, color: "#94a3b8" } }
+      x: { grid: { display: false }, ticks: { font: { size: 9 }, color: tickColor } },
+      y: { grid: { color: gridColor }, ticks: { font: { size: 9 }, color: tickColor } }
     }
   };
 
@@ -497,7 +509,7 @@ function DashboardView({ searchFilter = "" }) {
   const donutChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: "right", labels: { font: { size: 10 }, color: "#94a3b8" } } },
+    plugins: { legend: { position: "right", labels: { font: { size: 10 }, color: labelColor } } },
     cutout: "70%"
   };
 

@@ -125,7 +125,7 @@ function Header() {
         {/* Theme Switcher */}
         <button
           onClick={toggleTheme}
-          className="p-2 text-slate-500 hover:text-slate-850 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all duration-200"
+          className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all duration-200"
           title="Toggle Dark/Light Mode"
         >
           {isThemeDark ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
@@ -135,7 +135,7 @@ function Header() {
         <div className="relative">
           <button
             onClick={() => { setShowNotifications(!showNotifications); setShowProfileMenu(false); }}
-            className="p-2 text-slate-500 hover:text-slate-850 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all duration-200 relative"
+            className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all duration-200 relative"
           >
             <Bell className="w-4.5 h-4.5" />
             {unreadCount > 0 && (

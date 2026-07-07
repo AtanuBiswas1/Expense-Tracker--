@@ -131,7 +131,7 @@ function BudgetView() {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
           <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Budget Utilization</span>
           <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-extrabold text-slate-850 dark:text-slate-100">{budgetUtilization.toFixed(1)}%</h3>
+            <h3 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">{budgetUtilization.toFixed(1)}%</h3>
             <span className={`text-[10px] px-2 py-0.5 font-bold rounded-full ${budgetUtilization > 90 ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20'}`}>
               {budgetUtilization > 90 ? 'Critical' : 'Healthy'}
             </span>
@@ -151,7 +151,7 @@ function BudgetView() {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
           <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Overspending Alerts</span>
           <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-extrabold text-slate-850 dark:text-slate-100">{overspentCategories.length} Categories</h3>
+            <h3 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">{overspentCategories.length} Categories</h3>
             <div className={`p-1.5 rounded-lg ${overspentCategories.length > 0 ? 'bg-rose-550/15 text-rose-500' : 'bg-emerald-50 text-emerald-500'}`}>
               <AlertTriangle className="w-4 h-4" />
             </div>
@@ -165,7 +165,7 @@ function BudgetView() {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
           <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Budget Health Index</span>
           <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-extrabold text-slate-850 dark:text-slate-100">88/100</h3>
+            <h3 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">88/100</h3>
             <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600">
               <CheckCircle2 className="w-4 h-4" />
             </div>
