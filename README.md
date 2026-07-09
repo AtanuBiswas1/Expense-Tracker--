@@ -129,13 +129,36 @@ The application client runs on `http://localhost:5173` (Vite dev server) and lin
 ## 🖼️ Screenshots
 
 <p align="center">
-  <b>Signup & Login Screens</b><br>
+  <b>🔐 Authentication Screens</b><br>
   <img src="Screenshorts/signup.png" width="48%" />
   <img src="Screenshorts/login.png" width="48%" />
 </p>
 
 <p align="center">
-  <b>Transaction Input Forms</b><br>
-  <img src="Screenshorts/AddIncome.png" width="48%" />
-  <img src="Screenshorts/AddExpenses.png" width="48%" />
+  <b>📊 Dashboard & Transactions register</b><br>
+  <img src="Screenshorts/Dashbord.png" width="48%" />
+  <img src="Screenshorts/Transection.png" width="48%" />
+</p>
+
+<p align="center">
+  <b>🎯 Budget limits & Savings goals</b><br>
+  <img src="Screenshorts/Buget.png" width="48%" />
+  <img src="Screenshorts/Goal.png" width="48%" />
+</p>
+
+<p align="center">
+  <b>📝 Transaction inputs & Income tracking</b><br>
+  <img src="Screenshorts/add.png" width="48%" />
+  <img src="Screenshorts/income.png" width="48%" />
+</p>
+
+<p align="center">
+  <b>📑 Reports & Account Settings</b><br>
+  <img src="Screenshorts/Report.png" width="48%" />
+  <img src="Screenshorts/Setting.png" width="48%" />
+</p>
+
+<p align="center">
+  <b>🤖 AI Financial Advisor</b><br>
+  <img src="Screenshorts/AI.png" width="70%" />
 </p>
