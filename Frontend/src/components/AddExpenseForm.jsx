@@ -72,21 +72,102 @@ function AddExpenseForm({ setAddExpense, defaultType = "expense", onAddSuccess }
     }, 2500);
   };
 
-  // Simulate Voice Expense Entry
+  // Voice Expense/Income Entry using browser-native Web Speech API
   const triggerVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      addToast("Speech recognition is not supported in this browser. Please use Google Chrome.", "error");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
     setIsVoiceRecording(true);
-    addToast("Listening... Say: 'Spent 450 rupees on dinner at Starbucks today'", "info");
-    setTimeout(() => {
-      setValue("amount", 450);
-      setValue("merchant", "Starbucks Coffee");
-      setValue("description", "Evening Coffee & Snacks");
-      setValue("category", "food");
-      setValue("subCategory", "Snacks");
-      setValue("paymentMethod", "UPI");
-      setValue("wallet", "wallet_upi");
+    addToast("Listening... Try saying: 'Spent 500 rupees at Starbucks for dinner'", "info");
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      console.log("Speech parsed:", transcript);
+      
+      let amount = null;
+      let merchant = "";
+      let description = transcript;
+      let category = watch("type") === "income" ? "Other" : "other_exp";
+
+      // 1. Amount Extraction
+      const amountMatch = transcript.match(/\b\d+(?:\.\d+)?\b/);
+      if (amountMatch) {
+        amount = parseFloat(amountMatch[0]);
+      }
+
+      // 2. Merchant / Source Extraction
+      const merchantMatch = transcript.match(/\b(?:at|from|to|on)\s+([A-Za-z0-9\s]+?)(?:\s+(?:for|today|yesterday|rupees|dollars|rs|usd|in|on|at)\b|$)/i);
+      if (merchantMatch) {
+        merchant = merchantMatch[1].trim();
+      } else {
+        merchant = "Voice Input";
+      }
+
+      // 3. Category Matcher Heuristics
+      const textLower = transcript.toLowerCase();
+      if (watch("type") === "expense") {
+        if (textLower.match(/\b(?:food|dining|restaurant|cafe|starbucks|mcdonalds|burger|pizza|coffee|tea|lunch|dinner|breakfast|eat|eaten|grocery|groceries|supermarket)\b/)) {
+          category = "food";
+        } else if (textLower.match(/\b(?:commute|transport|bus|cab|taxi|uber|ola|auto|metro|train|flight|ticket|travel|trip|gas|fuel|petrol|diesel)\b/)) {
+          category = "transport";
+        } else if (textLower.match(/\b(?:shopping|clothes|shirt|dress|shoes|zara|h&m|amazon|flipkart|myntra|mall|electronics|phone|laptop)\b/)) {
+          category = "shopping";
+        } else if (textLower.match(/\b(?:rent|bills|electricity|power|gas|water|wifi|internet|broadband|utilities|recharge)\b/)) {
+          category = "utilities";
+        } else if (textLower.match(/\b(?:movie|cinema|netflix|spotify|game|gaming|fun|entertainment|club|bar|party|concert)\b/)) {
+          category = "entertainment";
+        } else if (textLower.match(/\b(?:rent|house|housing|apartment|flat|hostel)\b/)) {
+          category = "housing";
+        } else if (textLower.match(/\b(?:doctor|hospital|medical|medicine|clinic|pharmacy|dentist|healthcare)\b/)) {
+          category = "healthcare";
+        } else if (textLower.match(/\b(?:flight|hotel|airbnb|travel|trip|vacation|tour)\b/)) {
+          category = "travel";
+        } else if (textLower.match(/\b(?:school|college|fees|books|course|udemy|education|tuition)\b/)) {
+          category = "education";
+        }
+      } else {
+        // Income categories
+        if (textLower.match(/\b(?:salary|job|work|office|paycheck|corporate)\b/)) {
+          category = "Salary";
+        } else if (textLower.match(/\b(?:freelance|client|project|gigs|consulting)\b/)) {
+          category = "Freelance";
+        } else if (textLower.match(/\b(?:dividend|interest|stocks|shares|crypto|bitcoin|investment|mutual fund|profit)\b/)) {
+          category = "Investments";
+        }
+      }
+
+      // Populate Form Values
+      if (amount) setValue("amount", amount);
+      if (merchant) setValue("merchant", merchant);
+      setValue("description", description);
+      setValue("category", category);
+      
+      addToast(`Voice Parsed: ₹${amount || 'Not found'} at ${merchant}`, "success");
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech Recognition Error:", event.error);
+      if (event.error === "not-allowed") {
+        addToast("Microphone access denied. Please enable mic permissions.", "error");
+      } else {
+        addToast(`Voice Entry Error: ${event.error}`, "error");
+      }
       setIsVoiceRecording(false);
-      addToast("Voice Parsed: ₹450 spent at Starbucks", "success");
-    }, 3000);
+    };
+
+    recognition.onend = () => {
+      setIsVoiceRecording(false);
+    };
+
+    recognition.start();
   };
 
   const getCookie = (name) => {

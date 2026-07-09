@@ -1,79 +1,89 @@
-# Expense Tracker
+# COAB Expense Tracker
 
-A full-featured Expense Tracker web application built using the MERN stack (MongoDB, Express.js, React.js, Node.js) that helps users track expenses, set budgets, and visualize their financial data through interactive charts. 
+A full-featured, visually rich Expense Tracker web application built using the MERN stack (MongoDB, Express.js, React.js, Node.js) that helps users track expenses, manage budgets, set savings goals, and visualize their financial data through interactive charts.
 
-## Features
+---
 
-- **Expense Tracking**: Users can add, and delete expenses.
-- **Budget Management**: Set monthly or yearly budgets.
-- **Data Visualization**: Charts and graphs powered by Chart.js provide a clear overview of spending habits.
-- **Multiple API Integration**: Interacts with various backend APIs to provide real-time financial data.
-- **Authentication**: User registration and login with JWT-based authentication.
+## 🚀 Advanced Enhancements & Key Features
 
-<!-- ## Future Enhancements
+We have upgraded the application with several premium design systems and backend/frontend sync optimizations:
 
-- **Gemini API Integration**: Plan to integrate the Gemini API for additional data analysis and more personalized financial insights.
-- **Export to CSV/Excel**: Enable users to export their expense data to a CSV or Excel file for offline access.
-- **Recurring Expenses**: Set and manage recurring expenses like monthly bills. -->
+### 🎙️ Real-Time Web Speech API Voice Input
+- Native voice entry using browser-supported speech recognition (`window.SpeechRecognition` or `webkitSpeechRecognition`).
+- Custom parsing engine: Identifies spoken numbers as the amount, pulls merchant names following prepositions like "at" or "from", and matches keywords to categories dynamically (e.g., "coffee at Starbucks" matches category `food`).
 
-## Technologies Used
+### ⚡ Client-Side Zero-Latency Query Cache
+- Implemented a transparent cache (`apiCache`) in the API request client.
+- Drastically reduces load times and avoids duplicate fetch triggers during tab switching.
+- Auto-invalidates the cache on any state mutation (additions, modifications, deletions) using custom window events.
 
-- **Frontend**: React.js, HTML, CSS, Tailwind CSS
+### 💀 Premium Skeleton Loaders
+- Replaced basic spinners with detailed, pulsing placeholders mimicking charts, tables, calendar blocks, and statistics cards to give a modern, premium user experience.
+
+### 📊 Standardized Category Alignment
+- Aligned category IDs (`transport`, `housing`, `healthcare`, `other_exp`) across forms, budget limits progress indicators, and report visualizers to ensure seamless spend auditing.
+
+### 💾 Local Offline Fallback
+- Support for offline contributions and data additions with background local storage integration (`offline_expenses`, `offline_incomes`, `offline_goals`) when network errors occur.
+
+---
+
+## 🛠️ Technologies Used
+
+- **Frontend**: React.js, Tailwind CSS, Date-fns, Lucide React, Chart.js, React-Hook-Form
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB
-- **Data Visualization**: Chart.js
-- **API**: Multiple custom APIs, Gemini API (future integration)
-- **Authentication**: JWT for secure user authentication
-- **Version Control**: Git and GitHub for managing the project
+- **Authentication**: JWT cookies with security headers and config switches
 
-## Installation
+---
 
-1. Clone the repository:
+## ⚙️ Installation & Setup
 
-   ```bash
-   git clone https://github.com/your-username/expense-tracker.git
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/expense-tracker.git
+cd expense-tracker
+```
 
-2. Navigate into the project directory:
-   ```bash
-   cd expense-tracker
-3. Install the dependencies for both the frontend and backend:
-   ```bash
-   # Install frontend dependencies
-   
-    cd client
-    npm install
+### 2. Configure Environment Variables
 
-   # Install backend dependencies
-    cd ../server
-    npm install
-4. Create a .env file in the server directory with the following variables:
-   MONGODB_URI=your-mongodb-uri
-   JWT_SECRET=your-secret-key
+Create a `.env` file in the `Backend` directory:
+```env
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+```
 
-5. Run the application:
-   ```bash
-   # Run backend server
-   cd server
-   npm start
+### 3. Install Dependencies & Run
 
-   # Run frontend client in a new terminal
-   cd client
-   npm start
-   
-6. The app should be running on http://localhost:3000 for the frontend and http://localhost:5000 for the backend.
+#### Backend Server
+```bash
+cd Backend
+npm install
+npm run dev
+```
 
+#### Frontend Client
+```bash
+cd Frontend
+npm install
+npm run dev
+```
 
-## Screenshots
+The application client runs on `http://localhost:5173` (Vite dev server) and links to the backend server.
 
-<!-- ### Dashboard with Charts
-![Dashboard with Charts](./screenshots/dashboard.png) -->
-### Signup page
-![Signup page](/Screenshorts//signup.png)
-### Login page
-![Login page](/Screenshorts/login.png)
-### Add Income
-![Add Income](/Screenshorts/AddIncome.png)
-### Add Expenses
-![Add Expenses](/Screenshorts/AddExpenses.png)
-<!-- ### Budget Overview
-![Budget Overview](./screenshots/budget-overview.png) -->
+---
+
+## 🖼️ Screenshots
+
+### Signup Page
+![Signup Page](Screenshorts/signup.png)
+
+### Login Page
+![Login Page](Screenshorts/login.png)
+
+### Add Income Panel
+![Add Income](Screenshorts/AddIncome.png)
+
+### Add Expenses Panel
+![Add Expenses](Screenshorts/AddExpenses.png)
