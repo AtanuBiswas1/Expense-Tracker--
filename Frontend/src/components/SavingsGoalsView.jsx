@@ -16,30 +16,45 @@ function SavingsGoalsView() {
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [newGoalTarget, setNewGoalTarget] = useState("");
   const [newGoalCategory, setNewGoalCategory] = useState("Emergency Fund");
+  const [isLoading, setIsLoading] = useState(true);
   
   // Confetti particles state
   const [particles, setParticles] = useState([]);
   const [triggerCount, setTriggerCount] = useState(0);
 
   const loadGoals = async () => {
+    setIsLoading(true);
     try {
-      const res = await fetchSavingsGoalsApiCall();
-      if (res && res.data?.goals) {
-        const mapped = res.data.goals.map(g => ({
-          id: g._id,
-          title: g.title,
-          targetAmount: g.targetAmount,
-          currentAmount: g.currentAmount,
-          targetDate: g.targetDate ? g.targetDate.split("T")[0] : format(addMonths(new Date(), 6), "yyyy-MM-dd"),
-          category: g.category,
-          status: g.currentAmount >= g.targetAmount ? "completed" : "active",
-          icon: g.category === "Travel" ? "Plane" : (g.category === "Car" ? "Zap" : (g.category === "Laptop" ? "Laptop" : "ShieldAlert"))
-        }));
-        setGoals(mapped);
+      let dbGoals = [];
+      let offlineGoals = [];
+      try {
+        offlineGoals = JSON.parse(localStorage.getItem("offline_goals") || "[]");
+      } catch (e) {}
+
+      try {
+        const res = await fetchSavingsGoalsApiCall();
+        if (res && res.data?.goals) {
+          dbGoals = res.data.goals;
+        }
+      } catch (e) {
+        console.error(e);
       }
-    } catch (e) {
-      console.error(e);
-      addToast("Failed to retrieve goals from database", "error");
+
+      const combined = [...dbGoals, ...offlineGoals];
+      const mapped = combined.map(g => ({
+        id: g._id || g.id,
+        title: g.title,
+        targetAmount: g.targetAmount,
+        currentAmount: g.currentAmount,
+        targetDate: g.targetDate ? g.targetDate.split("T")[0] : format(addMonths(new Date(), 6), "yyyy-MM-dd"),
+        category: g.category,
+        status: g.currentAmount >= g.targetAmount ? "completed" : "active",
+        icon: g.category === "Travel" ? "Plane" : (g.category === "Car" ? "Zap" : (g.category === "Laptop" ? "Laptop" : "ShieldAlert")),
+        isOffline: !g._id
+      }));
+      setGoals(mapped);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -104,11 +119,39 @@ function SavingsGoalsView() {
         loadGoals();
         window.dispatchEvent(new CustomEvent("local-data-update"));
       } else {
-        addToast(res.message || "Failed to create savings goal", "warning");
+        const offlineGoals = JSON.parse(localStorage.getItem("offline_goals") || "[]");
+        offlineGoals.push({
+          id: `offline-goal-${Date.now()}`,
+          title: newGoalTitle,
+          targetAmount: Number(newGoalTarget),
+          currentAmount: 0,
+          category: newGoalCategory,
+          targetDate: targetDate
+        });
+        localStorage.setItem("offline_goals", JSON.stringify(offlineGoals));
+        addToast(`New goal '${newGoalTitle}' created (Offline Mode).`, "success");
+        setNewGoalTitle("");
+        setNewGoalTarget("");
+        loadGoals();
+        window.dispatchEvent(new CustomEvent("local-data-update"));
       }
     } catch (err) {
       console.error(err);
-      addToast("Failed to create savings goal", "error");
+      const offlineGoals = JSON.parse(localStorage.getItem("offline_goals") || "[]");
+      offlineGoals.push({
+        id: `offline-goal-${Date.now()}`,
+        title: newGoalTitle,
+        targetAmount: Number(newGoalTarget),
+        currentAmount: 0,
+        category: newGoalCategory,
+        targetDate: targetDate
+      });
+      localStorage.setItem("offline_goals", JSON.stringify(offlineGoals));
+      addToast(`New goal '${newGoalTitle}' created locally.`, "success");
+      setNewGoalTitle("");
+      setNewGoalTarget("");
+      loadGoals();
+      window.dispatchEvent(new CustomEvent("local-data-update"));
     }
   };
 
@@ -120,6 +163,23 @@ function SavingsGoalsView() {
     if (!amountStr || isNaN(amountStr) || Number(amountStr) <= 0) return;
     
     const amt = Number(amountStr);
+
+    if (goal.isOffline) {
+      const offlineGoals = JSON.parse(localStorage.getItem("offline_goals") || "[]");
+      const targetGoal = offlineGoals.find(g => g.id === goalId);
+      if (targetGoal) {
+        targetGoal.currentAmount = (targetGoal.currentAmount || 0) + amt;
+        localStorage.setItem("offline_goals", JSON.stringify(offlineGoals));
+        addToast(`Contributed ${currencySymbol}${amt.toLocaleString()} to goal locally!`, "success");
+        if (targetGoal.currentAmount >= targetGoal.targetAmount && goal.status !== "completed") {
+          triggerConfetti();
+          addToast("Congratulations! You've achieved your savings goal! 🏆 🎉", "success", 6000);
+        }
+        loadGoals();
+        window.dispatchEvent(new CustomEvent("local-data-update"));
+      }
+      return;
+    }
 
     try {
       const res = await contributeSavingsGoalApiCall(goalId, amt);
@@ -135,16 +195,70 @@ function SavingsGoalsView() {
         loadGoals();
         window.dispatchEvent(new CustomEvent("local-data-update"));
       } else {
-        addToast(res.message || "Failed to submit goal contribution", "warning");
+        const offlineGoals = JSON.parse(localStorage.getItem("offline_goals") || "[]");
+        let localGoal = offlineGoals.find(g => g.id === goalId);
+        if (!localGoal) {
+          localGoal = {
+            id: goal.id,
+            title: goal.title,
+            targetAmount: goal.targetAmount,
+            currentAmount: goal.currentAmount,
+            category: goal.category,
+            targetDate: goal.targetDate
+          };
+          offlineGoals.push(localGoal);
+        }
+        localGoal.currentAmount = (localGoal.currentAmount || 0) + amt;
+        localStorage.setItem("offline_goals", JSON.stringify(offlineGoals));
+        addToast(`Contributed ${currencySymbol}${amt.toLocaleString()} (Offline Mode).`, "success");
+        if (localGoal.currentAmount >= localGoal.targetAmount && goal.status !== "completed") {
+          triggerConfetti();
+          addToast("Congratulations! You've achieved your savings goal! 🏆 🎉", "success", 6000);
+        }
+        loadGoals();
+        window.dispatchEvent(new CustomEvent("local-data-update"));
       }
     } catch (err) {
       console.error(err);
-      addToast("Failed to contribute to savings goal", "error");
+      const offlineGoals = JSON.parse(localStorage.getItem("offline_goals") || "[]");
+      let localGoal = offlineGoals.find(g => g.id === goalId);
+      if (!localGoal) {
+        localGoal = {
+          id: goal.id,
+          title: goal.title,
+          targetAmount: goal.targetAmount,
+          currentAmount: goal.currentAmount,
+          category: goal.category,
+          targetDate: goal.targetDate
+        };
+        offlineGoals.push(localGoal);
+      }
+      localGoal.currentAmount = (localGoal.currentAmount || 0) + amt;
+      localStorage.setItem("offline_goals", JSON.stringify(offlineGoals));
+      addToast(`Contributed locally due to connection issue.`, "success");
+      if (localGoal.currentAmount >= localGoal.targetAmount && goal.status !== "completed") {
+        triggerConfetti();
+        addToast("Congratulations! You've achieved your savings goal! 🏆 🎉", "success", 6000);
+      }
+      loadGoals();
+      window.dispatchEvent(new CustomEvent("local-data-update"));
     }
   };
 
   const handleDeleteGoal = async (goalId) => {
     if (!confirm("Are you sure you want to delete this savings goal?")) return;
+    
+    const goal = goals.find(g => g.id === goalId);
+    if (goal && goal.isOffline) {
+      const offlineGoals = JSON.parse(localStorage.getItem("offline_goals") || "[]");
+      const filtered = offlineGoals.filter(g => g.id !== goalId);
+      localStorage.setItem("offline_goals", JSON.stringify(filtered));
+      addToast("Savings goal deleted locally.", "info");
+      loadGoals();
+      window.dispatchEvent(new CustomEvent("local-data-update"));
+      return;
+    }
+
     try {
       const res = await deleteSavingsGoalApiCall(goalId);
       if (res && res.success) {
@@ -152,11 +266,21 @@ function SavingsGoalsView() {
         loadGoals();
         window.dispatchEvent(new CustomEvent("local-data-update"));
       } else {
-        addToast(res.message || "Failed to delete savings goal", "warning");
+        const offlineGoals = JSON.parse(localStorage.getItem("offline_goals") || "[]");
+        const filtered = offlineGoals.filter(g => g.id !== goalId);
+        localStorage.setItem("offline_goals", JSON.stringify(filtered));
+        addToast("Savings goal deleted (Offline Mode).", "info");
+        loadGoals();
+        window.dispatchEvent(new CustomEvent("local-data-update"));
       }
     } catch (err) {
       console.error(err);
-      addToast("Failed to delete savings goal", "error");
+      const offlineGoals = JSON.parse(localStorage.getItem("offline_goals") || "[]");
+      const filtered = offlineGoals.filter(g => g.id !== goalId);
+      localStorage.setItem("offline_goals", JSON.stringify(filtered));
+      addToast("Savings goal deleted locally.", "info");
+      loadGoals();
+      window.dispatchEvent(new CustomEvent("local-data-update"));
     }
   };
 
@@ -168,6 +292,50 @@ function SavingsGoalsView() {
       default: return <ShieldAlert className="w-5 h-5 text-emerald-500" />;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
+        {/* Left Content: Goal lists skeleton */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="h-4 w-48 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4">
+                <div className="flex gap-3 items-center">
+                  <div className="p-3 bg-slate-100 dark:bg-slate-850 rounded-xl w-10 h-10"></div>
+                  <div className="space-y-2">
+                    <div className="h-3.5 w-32 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+                    <div className="h-2 w-20 bg-slate-200 dark:bg-slate-850 rounded-full"></div>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="h-3 w-full bg-slate-250 dark:bg-slate-800 rounded-full"></div>
+                  <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-950 rounded-full"></div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="h-7 w-20 bg-slate-200 dark:bg-slate-855 rounded-lg flex-1"></div>
+                  <div className="h-7 w-12 bg-slate-200 dark:bg-slate-855 rounded-lg"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Content: Add goal form skeleton */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 space-y-4 h-fit">
+          <div className="h-4 w-36 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="space-y-2">
+              <div className="h-2.5 w-24 bg-slate-250 dark:bg-slate-800 rounded-full"></div>
+              <div className="h-9 w-full bg-slate-100 dark:bg-slate-950 rounded-xl"></div>
+            </div>
+          ))}
+          <div className="h-9 w-full bg-slate-300 dark:bg-slate-700 rounded-xl"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 relative overflow-hidden">
@@ -208,6 +376,16 @@ function SavingsGoalsView() {
         
         {/* Left content: Goal lists */}
         <div className="lg:col-span-2 space-y-4">
+          <div className="bg-indigo-50/30 dark:bg-indigo-950/10 border border-indigo-150/40 dark:border-indigo-900/50 rounded-2xl p-4 flex items-start gap-3">
+            <TrendingUp className="w-5 h-5 text-indigo-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <h4 className="text-xs font-bold text-indigo-900 dark:text-indigo-300">Goal calculations & updates</h4>
+              <p className="text-[10px] text-slate-400 font-medium leading-relaxed mt-1">
+                To specify savings allocation, click **Contribute** on any goal and enter the transfer sum. This isolates that amount from your overall balance to track the target progress.
+              </p>
+            </div>
+          </div>
+
           <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <span>Savings Target Monitors</span>
             <span className="text-xs font-normal text-slate-400">({goals.filter(g => g.status === 'active').length} active)</span>

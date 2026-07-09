@@ -11,79 +11,94 @@ function ReportsView() {
   const [currencySymbol, setCurrencySymbol] = useState("₹");
   const [reportPeriod, setReportPeriod] = useState("current_month");
   const [dbLimits, setDbLimits] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadData = async () => {
-    let dbExpenses = [];
-    let dbIncomes = [];
-    let limitsList = [];
-    
+    setIsLoading(true);
     try {
-      const expRes = await ExpenceApiCall("", "", "");
-      if (expRes && expRes.data?.Expenses) {
-        dbExpenses = expRes.data.Expenses;
+      let dbExpenses = [];
+      let dbIncomes = [];
+      let limitsList = [];
+      let offlineExpenses = [];
+      let offlineIncomes = [];
+
+      try {
+        offlineExpenses = JSON.parse(localStorage.getItem("offline_expenses") || "[]");
+      } catch (e) {}
+      try {
+        offlineIncomes = JSON.parse(localStorage.getItem("offline_incomes") || "[]");
+      } catch (e) {}
+      
+      try {
+        const expRes = await ExpenceApiCall("", "", "");
+        if (expRes && expRes.data?.Expenses) {
+          dbExpenses = expRes.data.Expenses;
+        }
+      } catch (e) {
+        console.error("Failed to fetch expenses", e);
       }
-    } catch (e) {
-      console.error("Failed to fetch expenses", e);
+      
+      try {
+        const incRes = await IncomeApiCall("", "", "");
+        if (incRes && incRes.data?.Income) {
+          dbIncomes = incRes.data.Income;
+        }
+      } catch (e) {
+        console.error("Failed to fetch incomes", e);
+      }
+
+      try {
+        const limitRes = await fetchBudgetLimitsApiCall();
+        if (limitRes && limitRes.data?.limits) {
+          limitsList = limitRes.data.limits;
+        }
+      } catch (e) {
+        console.error("Failed to fetch limits", e);
+      }
+      setDbLimits(limitsList);
+
+      const normalizedExpenses = [...dbExpenses, ...offlineExpenses].map(e => ({
+        id: e._id || e.id,
+        title: e.description || "Expense",
+        amount: Number(e.amount),
+        category: e.category,
+        type: "expense",
+        date: e.date ? e.date.split("T")[0] : (e.createdAt ? e.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]),
+        merchant: e.merchant || "General",
+        paymentMethod: e.paymentMethod || "Cash",
+        wallet: e.wallet || "wallet_cash",
+        tags: e.tags || [],
+        status: "completed"
+      }));
+
+      const normalizedIncomes = [...dbIncomes, ...offlineIncomes].map(i => ({
+        id: i._id || i.id,
+        title: i.category || "Income Source",
+        amount: Number(i.amount),
+        category: i.category,
+        type: "income",
+        date: i.createdAt ? i.createdAt.split("T")[0] : new Date().toISOString().split("T")[0],
+        merchant: i.merchant || "Deposit",
+        paymentMethod: i.paymentMethod || "UPI",
+        wallet: i.wallet || "wallet_upi",
+        tags: i.tags || [],
+        status: "completed"
+      }));
+
+      const combined = [...normalizedExpenses, ...normalizedIncomes];
+      
+      // De-duplicate
+      const uniqueMap = {};
+      combined.forEach(t => {
+        const key = `${t.date}-${t.amount}-${t.category}-${t.description || t.title}`;
+        if (!uniqueMap[key]) {
+          uniqueMap[key] = t;
+        }
+      });
+      setTransactions(Object.values(uniqueMap));
+    } finally {
+      setIsLoading(false);
     }
-    
-    try {
-      const incRes = await IncomeApiCall("", "", "");
-      if (incRes && incRes.data?.Income) {
-        dbIncomes = incRes.data.Income;
-      }
-    } catch (e) {
-      console.error("Failed to fetch incomes", e);
-    }
-
-    try {
-      const limitRes = await fetchBudgetLimitsApiCall();
-      if (limitRes && limitRes.data?.limits) {
-        limitsList = limitRes.data.limits;
-      }
-    } catch (e) {
-      console.error("Failed to fetch limits", e);
-    }
-    setDbLimits(limitsList);
-
-    const normalizedExpenses = dbExpenses.map(e => ({
-      id: e._id,
-      title: e.description || "Expense",
-      amount: Number(e.amount),
-      category: e.category,
-      type: "expense",
-      date: e.date ? e.date.split("T")[0] : (e.createdAt ? e.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]),
-      merchant: e.merchant || "General",
-      paymentMethod: e.paymentMethod || "Cash",
-      wallet: e.wallet || "wallet_cash",
-      tags: e.tags || [],
-      status: "completed"
-    }));
-
-    const normalizedIncomes = dbIncomes.map(i => ({
-      id: i._id,
-      title: i.category || "Income Source",
-      amount: Number(i.amount),
-      category: i.category,
-      type: "income",
-      date: i.createdAt ? i.createdAt.split("T")[0] : new Date().toISOString().split("T")[0],
-      merchant: i.merchant || "Deposit",
-      paymentMethod: i.paymentMethod || "UPI",
-      wallet: i.wallet || "wallet_upi",
-      tags: i.tags || [],
-      status: "completed"
-    }));
-
-    const combined = [...normalizedExpenses, ...normalizedIncomes];
-    
-    // De-duplicate
-    const uniqueMap = {};
-    combined.forEach(t => {
-      const key = `${t.date}-${t.amount}-${t.category}-${t.description}`;
-      if (!uniqueMap[key]) {
-        uniqueMap[key] = t;
-      }
-    });
-    setTransactions(Object.values(uniqueMap));
   };
 
   useEffect(() => {
@@ -109,13 +124,15 @@ function ReportsView() {
 
   const categoriesList = [
     { id: "food", name: "Food & Dining" },
-    { id: "commute", name: "Transportation" },
-    { id: "rent", name: "Rent & Bills" },
-    { id: "utilities", name: "Utilities" },
     { id: "shopping", name: "Shopping" },
-    { id: "medical", name: "Healthcare" },
+    { id: "transport", name: "Transportation" },
+    { id: "utilities", name: "Utilities & Bills" },
     { id: "entertainment", name: "Entertainment" },
-    { id: "miscellaneous", name: "Other Expenses" }
+    { id: "housing", name: "Housing & Rent" },
+    { id: "healthcare", name: "Healthcare" },
+    { id: "travel", name: "Travel & Trips" },
+    { id: "education", name: "Education" },
+    { id: "other_exp", name: "Other Expenses" }
   ];
 
   // Category summary tables
@@ -145,6 +162,54 @@ function ReportsView() {
     a.click();
     addToast("Excel Report exported.", "success");
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm space-y-6 animate-pulse">
+        {/* Top bar skeleton */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="space-y-2">
+            <div className="h-4 w-44 bg-slate-350 dark:bg-slate-700 rounded-full"></div>
+            <div className="h-3.5 w-28 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+          </div>
+          <div className="flex gap-2">
+            <div className="h-8 w-16 bg-slate-100 dark:bg-slate-855 rounded-xl"></div>
+            <div className="h-8 w-16 bg-slate-100 dark:bg-slate-855 rounded-xl"></div>
+          </div>
+        </div>
+
+        {/* Audit metrics row skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="border border-slate-100 dark:border-slate-850/60 p-4 rounded-2xl space-y-3">
+              <div className="h-3 w-20 bg-slate-200 dark:bg-slate-850 rounded-full"></div>
+              <div className="h-5 w-24 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+              <div className="h-2 w-32 bg-slate-200 dark:bg-slate-850 rounded-full"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Detailed Audit Table skeleton */}
+        <div className="space-y-4">
+          <div className="h-4 w-36 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+          <div className="w-full overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-850/65">
+            <div className="bg-slate-55 dark:bg-slate-950 p-3 flex justify-between border-b border-slate-100 dark:border-slate-850/60">
+              <div className="h-3 w-16 bg-slate-200 dark:bg-slate-850 rounded-full"></div>
+              <div className="h-3 w-16 bg-slate-200 dark:bg-slate-850 rounded-full"></div>
+              <div className="h-3 w-16 bg-slate-200 dark:bg-slate-850 rounded-full"></div>
+            </div>
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="p-3 flex justify-between items-center border-b border-slate-100 dark:border-slate-850/60 last:border-none">
+                <div className="h-3 w-24 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+                <div className="h-3 w-16 bg-slate-200 dark:bg-slate-850 rounded-full"></div>
+                <div className="h-3.5 w-12 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm space-y-6 print:border-none print:shadow-none">

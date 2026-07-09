@@ -15,6 +15,22 @@ import {
   deleteSavingsGoalUrl
 } from "../constant.API_URL.js";
 
+const apiCache = {
+  expenses: {},
+  incomes: {},
+  limits: null,
+  goals: null
+};
+
+if (typeof window !== "undefined") {
+  window.addEventListener("local-data-update", () => {
+    apiCache.expenses = {};
+    apiCache.incomes = {};
+    apiCache.limits = null;
+    apiCache.goals = null;
+  });
+}
+
 async function signupFunction(userGivenDataForSignup, setResponceData) {
   try {
     let responce = await fetch(signupUrl, {
@@ -69,6 +85,11 @@ async function loginFunction(userGivenDataForLogin, setLoginMessage) {
 }
 
 async function ExpenceApiCall(date = "", month = "", year = "") {
+  const cacheKey = `${date}-${month}-${year}`;
+  if (apiCache.expenses[cacheKey]) {
+    return apiCache.expenses[cacheKey];
+  }
+
   const data = {
     date,
     month,
@@ -98,6 +119,9 @@ async function ExpenceApiCall(date = "", month = "", year = "") {
     });
     const responceAfterLogin = await responce.json();
     //console.log("line no 72",responceAfterLogin);
+    if (responceAfterLogin && responceAfterLogin.success) {
+      apiCache.expenses[cacheKey] = responceAfterLogin;
+    }
     return responceAfterLogin;
   } catch (error) {
     console.log("Login Error  ", error);
@@ -106,6 +130,11 @@ async function ExpenceApiCall(date = "", month = "", year = "") {
 }
 
 async function IncomeApiCall(date = "", month = "", year = "") {
+  const cacheKey = `${date}-${month}-${year}`;
+  if (apiCache.incomes[cacheKey]) {
+    return apiCache.incomes[cacheKey];
+  }
+
   const data = {
     date,
     month,
@@ -135,6 +164,9 @@ async function IncomeApiCall(date = "", month = "", year = "") {
     });
     const responceAfterLogin = await responce.json();
     //console.log("line no 72",responceAfterLogin);
+    if (responceAfterLogin && responceAfterLogin.success) {
+      apiCache.incomes[cacheKey] = responceAfterLogin;
+    }
     return responceAfterLogin;
   } catch (error) {
     console.log("Login Error  ", error);
@@ -196,6 +228,10 @@ async function addBudgetLimitApiCall(category, limit) {
 }
 
 async function fetchBudgetLimitsApiCall() {
+  if (apiCache.limits) {
+    return apiCache.limits;
+  }
+
   const getCookie = (name) => {
     return document.cookie
       .split("; ")
@@ -212,7 +248,11 @@ async function fetchBudgetLimitsApiCall() {
         Authorization: `Bearer ${token}`,
       },
     });
-    return await response.json();
+    const data = await response.json();
+    if (data && data.success) {
+      apiCache.limits = data;
+    }
+    return data;
   } catch (error) {
     console.error(error);
     return error;
@@ -270,6 +310,10 @@ async function contributeSavingsGoalApiCall(goalId, amount) {
 }
 
 async function fetchSavingsGoalsApiCall() {
+  if (apiCache.goals) {
+    return apiCache.goals;
+  }
+
   const getCookie = (name) => {
     return document.cookie
       .split("; ")
@@ -286,7 +330,11 @@ async function fetchSavingsGoalsApiCall() {
         Authorization: `Bearer ${token}`,
       },
     });
-    return await response.json();
+    const data = await response.json();
+    if (data && data.success) {
+      apiCache.goals = data;
+    }
+    return data;
   } catch (error) {
     console.error(error);
     return error;

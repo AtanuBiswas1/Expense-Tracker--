@@ -12,68 +12,83 @@ function CalendarView() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [transactions, setTransactions] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState("₹");
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadData = async () => {
-    let dbExpenses = [];
-    let dbIncomes = [];
-    
+    setIsLoading(true);
     try {
-      const expRes = await ExpenceApiCall("", "", "");
-      if (expRes && expRes.data?.Expenses) {
-        dbExpenses = expRes.data.Expenses;
+      let dbExpenses = [];
+      let dbIncomes = [];
+      let offlineExpenses = [];
+      let offlineIncomes = [];
+
+      try {
+        offlineExpenses = JSON.parse(localStorage.getItem("offline_expenses") || "[]");
+      } catch (e) {}
+      try {
+        offlineIncomes = JSON.parse(localStorage.getItem("offline_incomes") || "[]");
+      } catch (e) {}
+      
+      try {
+        const expRes = await ExpenceApiCall("", "", "");
+        if (expRes && expRes.data?.Expenses) {
+          dbExpenses = expRes.data.Expenses;
+        }
+      } catch (e) {
+        console.error("Failed to fetch expenses", e);
       }
-    } catch (e) {
-      console.error("Failed to fetch expenses", e);
+      
+      try {
+        const incRes = await IncomeApiCall("", "", "");
+        if (incRes && incRes.data?.Income) {
+          dbIncomes = incRes.data.Income;
+        }
+      } catch (e) {
+        console.error("Failed to fetch incomes", e);
+      }
+
+      const normalizedExpenses = [...dbExpenses, ...offlineExpenses].map(e => ({
+        id: e._id || e.id,
+        title: e.description || "Expense",
+        amount: Number(e.amount),
+        category: e.category,
+        type: "expense",
+        date: e.date ? e.date.split("T")[0] : (e.createdAt ? e.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]),
+        merchant: e.merchant || "General",
+        paymentMethod: e.paymentMethod || "Cash",
+        wallet: e.wallet || "wallet_cash",
+        tags: e.tags || [],
+        status: "completed"
+      }));
+
+      const normalizedIncomes = [...dbIncomes, ...offlineIncomes].map(i => ({
+        id: i._id || i.id,
+        title: i.category || "Income Source",
+        amount: Number(i.amount),
+        category: i.category,
+        type: "income",
+        date: i.createdAt ? i.createdAt.split("T")[0] : new Date().toISOString().split("T")[0],
+        merchant: i.merchant || "Deposit",
+        paymentMethod: i.paymentMethod || "UPI",
+        wallet: i.wallet || "wallet_upi",
+        tags: i.tags || [],
+        status: "completed"
+      }));
+
+      const combined = [...normalizedExpenses, ...normalizedIncomes];
+      
+      // De-duplicate
+      const uniqueMap = {};
+      combined.forEach(t => {
+        const key = `${t.date}-${t.amount}-${t.category}-${t.description || t.title}`;
+        if (!uniqueMap[key]) {
+          uniqueMap[key] = t;
+        }
+      });
+      setTransactions(Object.values(uniqueMap));
+    } finally {
+      setIsLoading(false);
     }
-    
-    try {
-      const incRes = await IncomeApiCall("", "", "");
-      if (incRes && incRes.data?.Income) {
-        dbIncomes = incRes.data.Income;
-      }
-    } catch (e) {
-      console.error("Failed to fetch incomes", e);
-    }
-
-    const normalizedExpenses = dbExpenses.map(e => ({
-      id: e._id,
-      title: e.description || "Expense",
-      amount: Number(e.amount),
-      category: e.category,
-      type: "expense",
-      date: e.date ? e.date.split("T")[0] : (e.createdAt ? e.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]),
-      merchant: e.merchant || "General",
-      paymentMethod: e.paymentMethod || "Cash",
-      wallet: e.wallet || "wallet_cash",
-      tags: e.tags || [],
-      status: "completed"
-    }));
-
-    const normalizedIncomes = dbIncomes.map(i => ({
-      id: i._id,
-      title: i.category || "Income Source",
-      amount: Number(i.amount),
-      category: i.category,
-      type: "income",
-      date: i.createdAt ? i.createdAt.split("T")[0] : new Date().toISOString().split("T")[0],
-      merchant: i.merchant || "Deposit",
-      paymentMethod: i.paymentMethod || "UPI",
-      wallet: i.wallet || "wallet_upi",
-      tags: i.tags || [],
-      status: "completed"
-    }));
-
-    const combined = [...normalizedExpenses, ...normalizedIncomes];
-    
-    // De-duplicate
-    const uniqueMap = {};
-    combined.forEach(t => {
-      const key = `${t.date}-${t.amount}-${t.category}-${t.description}`;
-      if (!uniqueMap[key]) {
-        uniqueMap[key] = t;
-      }
-    });
-    setTransactions(Object.values(uniqueMap));
   };
 
   useEffect(() => {
@@ -121,6 +136,34 @@ function CalendarView() {
 
   const selectedDateStr = format(selectedDate, "yyyy-MM-dd");
   const selectedTransactions = transactions.filter(t => t.date === selectedDateStr);
+
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-5 animate-pulse">
+        {/* Calendar Header skeleton */}
+        <div className="flex justify-between items-center">
+          <div className="h-4 w-32 bg-slate-350 dark:bg-slate-700 rounded-full"></div>
+          <div className="flex gap-2">
+            <div className="h-7 w-12 bg-slate-100 dark:bg-slate-855 rounded-lg"></div>
+            <div className="h-7 w-12 bg-slate-100 dark:bg-slate-855 rounded-lg"></div>
+          </div>
+        </div>
+
+        {/* Calendar Grid skeleton */}
+        <div className="grid grid-cols-7 gap-2">
+          {[...Array(7)].map((_, i) => (
+            <div key={i} className="h-3 bg-slate-200 dark:bg-slate-850 rounded-full w-8 mx-auto"></div>
+          ))}
+          {[...Array(35)].map((_, i) => (
+            <div key={i} className="aspect-square bg-slate-100 dark:bg-slate-950/80 border border-slate-50 dark:border-slate-850 rounded-2xl flex flex-col p-2 space-y-2">
+              <div className="h-3 w-4 bg-slate-255 dark:bg-slate-850 rounded"></div>
+              <div className="h-2 w-10 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-5">

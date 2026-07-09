@@ -129,6 +129,7 @@ function AddExpenseForm({ setAddExpense, defaultType = "expense", onAddSuccess }
       
       if (resData.success) {
         addToast(`${data.type === "expense" ? "Expense" : "Income"} successfully logged to dashboard.`, "success");
+        window.dispatchEvent(new Event("local-data-update"));
       } else {
         // Fallback for demo when backend endpoint is not matching payload schema or unauthorized
         // Save to local storage for offline state management

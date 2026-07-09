@@ -78,8 +78,9 @@ function Dashbord() {
       case "Analytics":
         return <DashboardView searchFilter={searchFilter} />;
       case "Transactions":
+        return <TransactionsView defaultFilterType="all" />;
       case "Expenses":
-        return <TransactionsView />;
+        return <TransactionsView defaultFilterType="expense" />;
       case "Income":
         return <IncomeView />;
       case "Budget":

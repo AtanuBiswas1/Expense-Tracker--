@@ -9,75 +9,88 @@ function BudgetView() {
   const [expenses, setExpenses] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState("₹");
   const [categoryBudgets, setCategoryBudgets] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadData = async () => {
-    let dbExpenses = [];
-    let dbLimits = [];
-    
+    setIsLoading(true);
     try {
-      const expRes = await ExpenceApiCall("", "", "");
-      if (expRes && expRes.data?.Expenses) {
-        dbExpenses = expRes.data.Expenses;
-      }
-    } catch (e) {
-      console.error("Failed to fetch expenses", e);
-    }
-    
-    try {
-      const limitRes = await fetchBudgetLimitsApiCall();
-      if (limitRes && limitRes.data?.limits) {
-        dbLimits = limitRes.data.limits;
-      }
-    } catch (e) {
-      console.error("Failed to fetch limits", e);
-    }
+      let dbExpenses = [];
+      let dbLimits = [];
+      let offlineExpenses = [];
 
-    const normalizedExpenses = dbExpenses.map(e => ({
-      id: e._id,
-      title: e.description || "Expense",
-      amount: Number(e.amount),
-      category: e.category,
-      type: "expense",
-      date: e.date ? e.date.split("T")[0] : (e.createdAt ? e.createdAt.split("T")[0] : new Date().toISOString().split("T")[0])
-    }));
-
-    setExpenses(normalizedExpenses);
-
-    const categoriesList = [
-      { id: "food", name: "Food & Dining", color: "#3B82F6" },
-      { id: "commute", name: "Transportation", color: "#EF4444" },
-      { id: "rent", name: "Rent & Bills", color: "#10B981" },
-      { id: "utilities", name: "Utilities", color: "#F59E0B" },
-      { id: "shopping", name: "Shopping", color: "#EC4899" },
-      { id: "medical", name: "Healthcare", color: "#8B5CF6" },
-      { id: "entertainment", name: "Entertainment", color: "#14B8A6" },
-      { id: "miscellaneous", name: "Other Expenses", color: "#64748B" }
-    ];
-
-    const mapped = categoriesList.map(cat => {
-      const dbLimitObj = dbLimits.find(l => l.category === cat.id);
-      const limitVal = dbLimitObj ? dbLimitObj.limit : 10000;
+      try {
+        offlineExpenses = JSON.parse(localStorage.getItem("offline_expenses") || "[]");
+      } catch (e) {}
       
-      const totalSpent = normalizedExpenses
-        .filter(t => t.category === cat.id)
-        .reduce((acc, t) => acc + t.amount, 0);
+      try {
+        const expRes = await ExpenceApiCall("", "", "");
+        if (expRes && expRes.data?.Expenses) {
+          dbExpenses = expRes.data.Expenses;
+        }
+      } catch (e) {
+        console.error("Failed to fetch expenses", e);
+      }
+      
+      try {
+        const limitRes = await fetchBudgetLimitsApiCall();
+        if (limitRes && limitRes.data?.limits) {
+          dbLimits = limitRes.data.limits;
+        }
+      } catch (e) {
+        console.error("Failed to fetch limits", e);
+      }
+
+      const normalizedExpenses = [...dbExpenses, ...offlineExpenses].map(e => ({
+        id: e._id || e.id,
+        title: e.description || "Expense",
+        amount: Number(e.amount),
+        category: e.category,
+        type: "expense",
+        date: e.date ? e.date.split("T")[0] : (e.createdAt ? e.createdAt.split("T")[0] : new Date().toISOString().split("T")[0])
+      }));
+
+      setExpenses(normalizedExpenses);
+
+      const categoriesList = [
+        { id: "food", name: "Food & Dining", color: "#3B82F6" },
+        { id: "shopping", name: "Shopping", color: "#EC4899" },
+        { id: "transport", name: "Transportation", color: "#EF4444" },
+        { id: "utilities", name: "Utilities & Bills", color: "#F59E0B" },
+        { id: "entertainment", name: "Entertainment", color: "#14B8A6" },
+        { id: "housing", name: "Housing & Rent", color: "#10B981" },
+        { id: "healthcare", name: "Healthcare", color: "#8B5CF6" },
+        { id: "travel", name: "Travel & Trips", color: "#06B6D4" },
+        { id: "education", name: "Education", color: "#6366F1" },
+        { id: "other_exp", name: "Other Expenses", color: "#64748B" }
+      ];
+
+      const mapped = categoriesList.map(cat => {
+        const dbLimitObj = dbLimits.find(l => l.category === cat.id);
+        const limitVal = dbLimitObj ? dbLimitObj.limit : 10000;
         
-      const pct = Math.min((totalSpent / limitVal) * 100, 100);
-      
-      let status = "success";
-      if (pct >= 90) status = "danger";
-      else if (pct >= 75) status = "warning";
-      
-      return {
-        ...cat,
-        limit: limitVal,
-        totalSpent,
-        pct,
-        status
-      };
-    });
+        const totalSpent = normalizedExpenses
+          .filter(t => t.category === cat.id)
+          .reduce((acc, t) => acc + t.amount, 0);
+          
+        const pct = Math.min((totalSpent / limitVal) * 100, 100);
+        
+        let status = "success";
+        if (pct >= 90) status = "danger";
+        else if (pct >= 75) status = "warning";
+        
+        return {
+          ...cat,
+          limit: limitVal,
+          totalSpent,
+          pct,
+          status
+        };
+      });
 
-    setCategoryBudgets(mapped);
+      setCategoryBudgets(mapped);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleEditLimit = async (categoryId, currentLimit) => {
@@ -120,6 +133,40 @@ function BudgetView() {
 
 
   const overspentCategories = categoryBudgets.filter(c => c.totalSpent > c.limit);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        {/* Skeleton Overview Block */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3">
+              <div className="h-3 w-28 bg-slate-250 dark:bg-slate-850 rounded-full"></div>
+              <div className="h-6 w-20 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+              <div className="h-2 w-full bg-slate-100 dark:bg-slate-950 rounded-full"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Skeleton Category List */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4">
+          <div className="h-4 w-48 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="space-y-2 border border-slate-100 dark:border-slate-850 p-4 rounded-2xl">
+                <div className="flex justify-between items-center">
+                  <div className="h-3.5 w-24 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+                  <div className="h-3 w-16 bg-slate-250 dark:bg-slate-850 rounded-full"></div>
+                </div>
+                <div className="h-2 w-full bg-slate-100 dark:bg-slate-950 rounded-full"></div>
+                <div className="h-2.5 w-32 bg-slate-250 dark:bg-slate-850 rounded-full"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

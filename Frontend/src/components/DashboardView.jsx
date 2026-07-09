@@ -77,86 +77,101 @@ function DashboardView({ searchFilter = "" }) {
   const [currencySymbol, setCurrencySymbol] = useState("₹");
   const [totalBudgetLimit, setTotalBudgetLimit] = useState(200000);
   const [isDark, setIsDark] = useState(document.documentElement.classList.contains("dark"));
+  const [isLoading, setIsLoading] = useState(true);
 
   // Reload local state
   const loadLocalData = async () => {
-    let dbExpenses = [];
-    let dbIncomes = [];
-    let dbLimits = [];
-
+    setIsLoading(true);
     try {
-      const expRes = await ExpenceApiCall("", "", "");
-      if (expRes && expRes.data?.Expenses) {
-        dbExpenses = expRes.data.Expenses;
+      let dbExpenses = [];
+      let dbIncomes = [];
+      let dbLimits = [];
+      let offlineExpenses = [];
+      let offlineIncomes = [];
+
+      try {
+        offlineExpenses = JSON.parse(localStorage.getItem("offline_expenses") || "[]");
+      } catch (e) {}
+      try {
+        offlineIncomes = JSON.parse(localStorage.getItem("offline_incomes") || "[]");
+      } catch (e) {}
+
+      try {
+        const expRes = await ExpenceApiCall("", "", "");
+        if (expRes && expRes.data?.Expenses) {
+          dbExpenses = expRes.data.Expenses;
+        }
+      } catch (e) {
+        console.error("Failed to fetch expenses from backend", e);
       }
-    } catch (e) {
-      console.error("Failed to fetch expenses from backend", e);
+
+      try {
+        const incRes = await IncomeApiCall("", "", "");
+        if (incRes && incRes.data?.Income) {
+          dbIncomes = incRes.data.Income;
+        }
+      } catch (e) {
+        console.error("Failed to fetch incomes from backend", e);
+      }
+
+      try {
+        const limitRes = await fetchBudgetLimitsApiCall();
+        if (limitRes && limitRes.data?.limits) {
+          dbLimits = limitRes.data.limits;
+        }
+      } catch (e) {
+        console.error("Failed to fetch limits from backend", e);
+      }
+
+      const limitSum = dbLimits.reduce((sum, l) => sum + l.limit, 0) || 80000;
+      setTotalBudgetLimit(limitSum);
+
+      const normalizedExpenses = [...dbExpenses, ...offlineExpenses].map(e => ({
+        id: e._id || e.id,
+        title: e.description || "Expense",
+        amount: Number(e.amount),
+        category: e.category,
+        type: "expense",
+        date: e.date ? e.date.split("T")[0] : (e.createdAt ? e.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]),
+        merchant: e.merchant || "General",
+        paymentMethod: e.paymentMethod || "Cash",
+        wallet: e.wallet || "wallet_cash",
+        tags: e.tags || [],
+        status: "completed"
+      }));
+
+      const normalizedIncomes = [...dbIncomes, ...offlineIncomes].map(i => ({
+        id: i._id || i.id,
+        title: i.category || "Income Source",
+        amount: Number(i.amount),
+        category: i.category,
+        type: "income",
+        date: i.createdAt ? i.createdAt.split("T")[0] : new Date().toISOString().split("T")[0],
+        merchant: i.merchant || "Deposit",
+        paymentMethod: i.paymentMethod || "UPI",
+        wallet: i.wallet || "wallet_upi",
+        tags: i.tags || [],
+        status: "completed"
+      }));
+
+      const combined = [...normalizedExpenses, ...normalizedIncomes];
+      // De-duplicate mock items and local updates by date/time
+      const uniqueMap = {};
+      combined.forEach(t => {
+        const key = `${t.date}-${t.amount}-${t.category}-${t.description}`;
+        if (!uniqueMap[key]) {
+          uniqueMap[key] = t;
+        }
+      });
+
+      const dedupedList = Object.values(uniqueMap).sort((a, b) => b.date.localeCompare(a.date));
+      setTransactions(dedupedList);
+
+      setExpenses(dedupedList.filter(t => t.type === "expense"));
+      setIncomes(dedupedList.filter(t => t.type === "income"));
+    } finally {
+      setIsLoading(false);
     }
-
-    try {
-      const incRes = await IncomeApiCall("", "", "");
-      if (incRes && incRes.data?.Income) {
-        dbIncomes = incRes.data.Income;
-      }
-    } catch (e) {
-      console.error("Failed to fetch incomes from backend", e);
-    }
-
-    try {
-      const limitRes = await fetchBudgetLimitsApiCall();
-      if (limitRes && limitRes.data?.limits) {
-        dbLimits = limitRes.data.limits;
-      }
-    } catch (e) {
-      console.error("Failed to fetch limits from backend", e);
-    }
-
-    const limitSum = dbLimits.reduce((sum, l) => sum + l.limit, 0) || 80000;
-    setTotalBudgetLimit(limitSum);
-
-    const normalizedExpenses = dbExpenses.map(e => ({
-      id: e._id,
-      title: e.description || "Expense",
-      amount: Number(e.amount),
-      category: e.category,
-      type: "expense",
-      date: e.date ? e.date.split("T")[0] : (e.createdAt ? e.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]),
-      merchant: e.merchant || "General",
-      paymentMethod: e.paymentMethod || "Cash",
-      wallet: e.wallet || "wallet_cash",
-      tags: e.tags || [],
-      status: "completed"
-    }));
-
-    const normalizedIncomes = dbIncomes.map(i => ({
-      id: i._id,
-      title: i.category || "Income Source",
-      amount: Number(i.amount),
-      category: i.category,
-      type: "income",
-      date: i.createdAt ? i.createdAt.split("T")[0] : new Date().toISOString().split("T")[0],
-      merchant: i.merchant || "Deposit",
-      paymentMethod: i.paymentMethod || "UPI",
-      wallet: i.wallet || "wallet_upi",
-      tags: i.tags || [],
-      status: "completed"
-    }));
-
-    const combined = [...normalizedExpenses, ...normalizedIncomes];
-    // De-duplicate mock items and local updates by date/time
-    const uniqueMap = {};
-    combined.forEach(t => {
-      const key = `${t.date}-${t.amount}-${t.category}-${t.description}`;
-      if (!uniqueMap[key]) {
-        uniqueMap[key] = t;
-      }
-    });
-
-    const dedupedList = Object.values(uniqueMap).sort((a, b) => b.date.localeCompare(a.date));
-    setTransactions(dedupedList);
-
-    setExpenses(dedupedList.filter(t => t.type === "expense"));
-    setIncomes(dedupedList.filter(t => t.type === "income"));
   };
 
   useEffect(() => {
@@ -512,6 +527,64 @@ function DashboardView({ searchFilter = "" }) {
     plugins: { legend: { position: "right", labels: { font: { size: 10 }, color: labelColor } } },
     cutout: "70%"
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        {/* Skeleton Summary Cards Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-5.5 space-y-3">
+              <div className="h-3 w-16 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+              <div className="h-6 w-24 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+              <div className="h-2 w-32 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Skeleton Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-6 h-80 space-y-4">
+            <div className="flex justify-between">
+              <div className="h-4 w-40 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+              <div className="h-4 w-20 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+            </div>
+            <div className="h-48 w-full bg-slate-100 dark:bg-slate-950 rounded-2xl flex items-end p-4 gap-2">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className="flex-1 bg-slate-200 dark:bg-slate-800 rounded-t" style={{ height: `${20 + Math.random() * 60}%` }}></div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-6 h-80 flex flex-col items-center justify-center space-y-6">
+            <div className="h-4 w-32 bg-slate-300 dark:bg-slate-700 rounded-full self-start"></div>
+            <div className="w-36 h-36 rounded-full border-8 border-slate-200 dark:border-slate-800 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-white dark:bg-slate-900 shadow"></div>
+            </div>
+            <div className="h-3 w-40 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+          </div>
+        </div>
+
+        {/* Skeleton Recent Activity */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-6 space-y-4">
+          <div className="h-4 w-36 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex justify-between items-center py-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-800"></div>
+                  <div className="space-y-2">
+                    <div className="h-3.5 w-40 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+                    <div className="h-2 w-20 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+                  </div>
+                </div>
+                <div className="h-4 w-16 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

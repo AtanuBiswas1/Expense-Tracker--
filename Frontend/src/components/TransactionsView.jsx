@@ -8,7 +8,7 @@ import { InitialTransactions, ExpenseCategories, IncomeCategories } from "../uti
 import { useToast } from "../context/ToastContext";
 import { ExpenceApiCall, IncomeApiCall } from "../API/apiCall.Function.js";
 
-function TransactionsView() {
+function TransactionsView({ defaultFilterType = "all" }) {
   const { addToast } = useToast();
   
   // States
@@ -19,12 +19,13 @@ function TransactionsView() {
   const [sortOrder, setSortOrder] = useState("desc");
   
   // Filter Fields
-  const [filterType, setFilterType] = useState("all"); // all, income, expense
+  const [filterType, setFilterType] = useState(defaultFilterType); // all, income, expense
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterPayment, setFilterPayment] = useState("all");
   const [filterDateRange, setFilterDateRange] = useState("all"); // all, today, 7days, 30days
   const [minAmount, setMinAmount] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   
   // Selection & Columns
   const [selectedIds, setSelectedIds] = useState([]);
@@ -45,69 +46,87 @@ function TransactionsView() {
   const [currencySymbol, setCurrencySymbol] = useState("₹");
 
   const loadData = async () => {
-    let dbExpenses = [];
-    let dbIncomes = [];
-    
+    setIsLoading(true);
     try {
-      const expRes = await ExpenceApiCall("", "", "");
-      if (expRes && expRes.data?.Expenses) {
-        dbExpenses = expRes.data.Expenses;
+      let dbExpenses = [];
+      let dbIncomes = [];
+      let offlineExpenses = [];
+      let offlineIncomes = [];
+
+      try {
+        offlineExpenses = JSON.parse(localStorage.getItem("offline_expenses") || "[]");
+      } catch (e) {}
+      try {
+        offlineIncomes = JSON.parse(localStorage.getItem("offline_incomes") || "[]");
+      } catch (e) {}
+      
+      try {
+        const expRes = await ExpenceApiCall("", "", "");
+        if (expRes && expRes.data?.Expenses) {
+          dbExpenses = expRes.data.Expenses;
+        }
+      } catch (e) {
+        console.error("Failed to fetch expenses from backend", e);
       }
-    } catch (e) {
-      console.error("Failed to fetch expenses from backend", e);
+      
+      try {
+        const incRes = await IncomeApiCall("", "", "");
+        if (incRes && incRes.data?.Income) {
+          dbIncomes = incRes.data.Income;
+        }
+      } catch (e) {
+        console.error("Failed to fetch incomes from backend", e);
+      }
+
+      const normalizedExpenses = [...dbExpenses, ...offlineExpenses].map(e => ({
+        id: e._id || e.id,
+        title: e.description || "Expense",
+        amount: Number(e.amount),
+        category: e.category,
+        type: "expense",
+        date: e.date ? e.date.split("T")[0] : (e.createdAt ? e.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]),
+        merchant: e.merchant || "General",
+        paymentMethod: e.paymentMethod || "Cash",
+        wallet: e.wallet || "wallet_cash",
+        tags: e.tags || [],
+        status: "completed"
+      }));
+
+      const normalizedIncomes = [...dbIncomes, ...offlineIncomes].map(i => ({
+        id: i._id || i.id,
+        title: i.category || "Income Source",
+        amount: Number(i.amount),
+        category: i.category,
+        type: "income",
+        date: i.createdAt ? i.createdAt.split("T")[0] : new Date().toISOString().split("T")[0],
+        merchant: i.merchant || "Deposit",
+        paymentMethod: i.paymentMethod || "UPI",
+        wallet: i.wallet || "wallet_upi",
+        tags: i.tags || [],
+        status: "completed"
+      }));
+
+      const combined = [...normalizedExpenses, ...normalizedIncomes];
+      
+      // De-duplicating by unique fields
+      const uniqueMap = {};
+      combined.forEach(t => {
+        const key = `${t.date}-${t.amount}-${t.category}-${t.description || t.title}`;
+        if (!uniqueMap[key]) {
+          uniqueMap[key] = t;
+        }
+      });
+
+      const sortedList = Object.values(uniqueMap).sort((a, b) => b.date.localeCompare(a.date));
+      setTransactions(sortedList);
+    } finally {
+      setIsLoading(false);
     }
-    
-    try {
-      const incRes = await IncomeApiCall("", "", "");
-      if (incRes && incRes.data?.Income) {
-        dbIncomes = incRes.data.Income;
-      }
-    } catch (e) {
-      console.error("Failed to fetch incomes from backend", e);
-    }
-
-    const normalizedExpenses = dbExpenses.map(e => ({
-      id: e._id,
-      title: e.description || "Expense",
-      amount: Number(e.amount),
-      category: e.category,
-      type: "expense",
-      date: e.date ? e.date.split("T")[0] : (e.createdAt ? e.createdAt.split("T")[0] : new Date().toISOString().split("T")[0]),
-      merchant: e.merchant || "General",
-      paymentMethod: e.paymentMethod || "Cash",
-      wallet: e.wallet || "wallet_cash",
-      tags: e.tags || [],
-      status: "completed"
-    }));
-
-    const normalizedIncomes = dbIncomes.map(i => ({
-      id: i._id,
-      title: i.category || "Income Source",
-      amount: Number(i.amount),
-      category: i.category,
-      type: "income",
-      date: i.createdAt ? i.createdAt.split("T")[0] : new Date().toISOString().split("T")[0],
-      merchant: i.merchant || "Deposit",
-      paymentMethod: i.paymentMethod || "UPI",
-      wallet: i.wallet || "wallet_upi",
-      tags: i.tags || [],
-      status: "completed"
-    }));
-
-    const combined = [...normalizedExpenses, ...normalizedIncomes];
-    
-    // De-duplicating by unique fields
-    const uniqueMap = {};
-    combined.forEach(t => {
-      const key = `${t.date}-${t.amount}-${t.category}-${t.description}`;
-      if (!uniqueMap[key]) {
-        uniqueMap[key] = t;
-      }
-    });
-
-    const sortedList = Object.values(uniqueMap).sort((a, b) => b.date.localeCompare(a.date));
-    setTransactions(sortedList);
   };
+
+  useEffect(() => {
+    setFilterType(defaultFilterType);
+  }, [defaultFilterType]);
 
   useEffect(() => {
     loadData();
@@ -311,6 +330,63 @@ function TransactionsView() {
     if (incomeCat) return incomeCat.color;
     return "#64748B";
   };
+
+  if (isLoading) {
+    return (
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-4 animate-pulse">
+        {/* Skeleton Top Controls */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          <div className="h-4 w-44 bg-slate-350 dark:bg-slate-700 rounded-full"></div>
+          <div className="flex gap-2 flex-wrap">
+            <div className="h-8 w-16 bg-slate-200 dark:bg-slate-850 rounded-xl"></div>
+            <div className="h-8 w-16 bg-slate-200 dark:bg-slate-850 rounded-xl"></div>
+            <div className="h-8 w-24 bg-slate-200 dark:bg-slate-850 rounded-xl"></div>
+          </div>
+        </div>
+
+        {/* Search controls skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="h-9 w-full bg-slate-100 dark:bg-slate-950 rounded-xl"></div>
+          <div className="h-9 w-full bg-slate-100 dark:bg-slate-950 rounded-xl"></div>
+          <div className="h-9 w-full bg-slate-100 dark:bg-slate-950 rounded-xl"></div>
+          <div className="h-9 w-full bg-slate-100 dark:bg-slate-950 rounded-xl"></div>
+        </div>
+
+        {/* Table skeleton */}
+        <div className="w-full overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-850/60">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead className="bg-slate-55 dark:bg-slate-950 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100 dark:border-slate-850/60">
+              <tr>
+                <th className="py-2.5 px-4"><div className="h-3 w-4 bg-slate-200 dark:bg-slate-850 rounded"></div></th>
+                <th className="py-2.5 px-4"><div className="h-3 w-16 bg-slate-200 dark:bg-slate-850 rounded-full"></div></th>
+                <th className="py-2.5 px-4"><div className="h-3 w-28 bg-slate-200 dark:bg-slate-855 rounded-full"></div></th>
+                <th className="py-2.5 px-4"><div className="h-3 w-16 bg-slate-200 dark:bg-slate-850 rounded-full"></div></th>
+                <th className="py-2.5 px-4"><div className="h-3 w-16 bg-slate-200 dark:bg-slate-850 rounded-full"></div></th>
+                <th className="py-2.5 px-4 text-right"><div className="h-3 w-12 bg-slate-200 dark:bg-slate-850 rounded-full ml-auto"></div></th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...Array(6)].map((_, index) => (
+                <tr key={index} className="border-b border-slate-100 dark:border-slate-850/60">
+                  <td className="py-3 px-4"><div className="h-3 w-3 bg-slate-200 dark:bg-slate-855 rounded"></div></td>
+                  <td className="py-3 px-4"><div className="h-3 w-16 bg-slate-200 dark:bg-slate-855 rounded-full"></div></td>
+                  <td className="py-3 px-4">
+                    <div className="space-y-1.5">
+                      <div className="h-3 w-36 bg-slate-300 dark:bg-slate-700 rounded-full"></div>
+                      <div className="h-2 w-16 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4"><div className="h-3.5 w-16 bg-slate-200 dark:bg-slate-800 rounded-full"></div></td>
+                  <td className="py-3 px-4"><div className="h-3 w-16 bg-slate-200 dark:bg-slate-855 rounded-full"></div></td>
+                  <td className="py-3 px-4 text-right font-bold"><div className="h-3.5 w-12 bg-slate-300 dark:bg-slate-700 rounded-full ml-auto"></div></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-4">
