@@ -1,0 +1,10 @@
+# Exclude files
+abc
+PLANNED_FEATURES.md
+node_modules/
+Backend/node_modules/
+Frontend/node_modules/
+.env
+Backend/.env
+Frontend/.env
+dist/

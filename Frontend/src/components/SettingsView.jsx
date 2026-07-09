@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { checkAuth } from "../features/loginuser/loginUser.Slice.js";
 import { useToast } from "../context/ToastContext";
 import { User, Shield, Bell, Globe, Database, Moon, Sun, Download, Upload } from "lucide-react";
+import { ExpenceApiCall, IncomeApiCall, fetchBudgetLimitsApiCall, fetchSavingsGoalsApiCall } from "../API/apiCall.Function.js";
 
 function SettingsView() {
   const { addToast } = useToast();
@@ -57,22 +58,62 @@ function SettingsView() {
     addToast(`Currency switched to ${val}.`, "info");
   };
 
-  const handleBackupExport = () => {
-    const localExpenses = localStorage.getItem("offline_expenses") || "[]";
-    const localIncomes = localStorage.getItem("offline_incomes") || "[]";
+  const handleBackupExport = async () => {
+    addToast("Generating backup (fetching database records)...", "info");
+    
+    let dbExpenses = [];
+    let dbIncomes = [];
+    let dbLimits = [];
+    let dbGoals = [];
+
+    try {
+      const expRes = await ExpenceApiCall();
+      if (expRes && expRes.data?.Expenses) {
+        dbExpenses = expRes.data.Expenses;
+      }
+    } catch (e) {}
+    
+    try {
+      const incRes = await IncomeApiCall();
+      if (incRes && incRes.data?.Income) {
+        dbIncomes = incRes.data.Income;
+      }
+    } catch (e) {}
+
+    try {
+      const limitRes = await fetchBudgetLimitsApiCall();
+      if (limitRes && limitRes.data?.limits) {
+        dbLimits = limitRes.data.limits;
+      }
+    } catch (e) {}
+
+    try {
+      const goalRes = await fetchSavingsGoalsApiCall();
+      if (goalRes && goalRes.data?.savingsGoals) {
+        dbGoals = goalRes.data.savingsGoals;
+      }
+    } catch (e) {}
+
+    const localExpenses = JSON.parse(localStorage.getItem("offline_expenses") || "[]");
+    const localIncomes = JSON.parse(localStorage.getItem("offline_incomes") || "[]");
+    const localGoals = JSON.parse(localStorage.getItem("offline_goals") || "[]");
+
     const backupObj = {
-      expenses: JSON.parse(localExpenses),
-      incomes: JSON.parse(localIncomes),
-      timestamp: new Date().toISOString()
+      expenses: [...dbExpenses.map(e => ({ ...e, isFromDb: true })), ...localExpenses],
+      incomes: [...dbIncomes.map(i => ({ ...i, isFromDb: true })), ...localIncomes],
+      limits: dbLimits,
+      goals: [...dbGoals.map(g => ({ ...g, isFromDb: true })), ...localGoals],
+      timestamp: new Date().toISOString(),
+      version: "2.0"
     };
     
     const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `COAB_Local_Backup_${Date.now()}.json`;
+    a.download = `COAB_Financial_Backup_${Date.now()}.json`;
     a.click();
-    addToast("Local data backup file exported.", "success");
+    addToast("Full financial database backup exported.", "success");
   };
 
   const handleBackupImport = (e) => {
@@ -83,9 +124,15 @@ function SettingsView() {
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target.result);
-        if (parsed.expenses || parsed.incomes) {
-          localStorage.setItem("offline_expenses", JSON.stringify(parsed.expenses || []));
-          localStorage.setItem("offline_incomes", JSON.stringify(parsed.incomes || []));
+        if (parsed.expenses || parsed.incomes || parsed.limits || parsed.goals) {
+          const localExpenses = (parsed.expenses || []).filter(e => !e.isFromDb);
+          const localIncomes = (parsed.incomes || []).filter(i => !i.isFromDb);
+          const localGoals = (parsed.goals || []).filter(g => !g.isFromDb);
+
+          localStorage.setItem("offline_expenses", JSON.stringify(localExpenses));
+          localStorage.setItem("offline_incomes", JSON.stringify(localIncomes));
+          localStorage.setItem("offline_goals", JSON.stringify(localGoals));
+
           addToast("Backup restored successfully!", "success");
           window.dispatchEvent(new Event("local-data-update"));
         } else {

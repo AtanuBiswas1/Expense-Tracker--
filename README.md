@@ -17,14 +17,66 @@ We have upgraded the application with several premium design systems and backend
 - Drastically reduces load times and avoids duplicate fetch triggers during tab switching.
 - Auto-invalidates the cache on any state mutation (additions, modifications, deletions) using custom window events.
 
+### 🖼️ Chart.js Visual Canvas Image Exporter
+- Downloads Chart.js visual graphs directly as PNG image attachments.
+- Actionable download trigger buttons integrated directly on the dashboard card headers.
+
+### 💾 Complete Database & Local Data Backup Sync
+- Overhauled backup routines to compile both offline fallback collections (`offline_expenses`, `offline_incomes`, `offline_goals`) and the primary database endpoints into a unified backup JSON file.
+- Transparent restore mechanism to sync client states instantly.
+
 ### 💀 Premium Skeleton Loaders
 - Replaced basic spinners with detailed, pulsing placeholders mimicking charts, tables, calendar blocks, and statistics cards to give a modern, premium user experience.
 
 ### 📊 Standardized Category Alignment
 - Aligned category IDs (`transport`, `housing`, `healthcare`, `other_exp`) across forms, budget limits progress indicators, and report visualizers to ensure seamless spend auditing.
 
-### 💾 Local Offline Fallback
-- Support for offline contributions and data additions with background local storage integration (`offline_expenses`, `offline_incomes`, `offline_goals`) when network errors occur.
+---
+
+## 🎛️ Detailed View-by-View Features
+
+The COAB Expense Tracker includes nine core workspaces that offer full coverage for personal finance management:
+
+### 1. 📊 Interactive Dashboard View
+- **Summary Metrics**: High-level visual display of Total Income, Total Expenses, net Balance, and active Savings Goals progress.
+- **Interactive Visualizers**: Spline area charts showing cashflow trends and category allocation distribution doughnut charts powered by Chart.js.
+- **Recent Activity Ledger**: Quick-glance list of the latest transactions with automatic color-coded indicator tags.
+- **Visual Exporter**: Save any chart as a PNG image for off-app reporting.
+
+### 2. 🧾 Transactions Register
+- **Advanced Querying**: Search by keyword or description and filter transactions dynamically by Type (All, Income, Expense), Category, Payment Method (UPI, Cash, Card, Net Banking), and Date Ranges.
+- **Record Management**: View complete transactional metadata or delete obsolete records instantly.
+
+### 3. 📈 Income Tracker
+- **Stream Allocation**: Track income streams under specific categories (Salary, Freelance, Investments, Other).
+- **History Logs**: Chronological table showing historical deposits and corresponding financial notes.
+
+### 4. 🎯 Budget Allocations & Progress
+- **Custom Threshold Limits**: Set monthly category-specific spending caps.
+- **Real-Time Progress Tracking**: Visual progress bars mapping total category spending against threshold limits.
+- **Status Indicators**: Dynamic alerts highlighting categories that are overspent or close to limits.
+
+### 5. 🏆 Savings Target Monitors
+- **Goal Customization**: Set saving targets with target amounts, icons, and target dates.
+- **Contribution Tracking**: Deduce and isolate funds manually from overall balance via the **Contribute** module.
+- **Gamified Rewards**: Built-in confetti canvas animations triggering immediately upon successful goal completion.
+
+### 6. 📅 Calendar Visualizer
+- **Cashflow Matrix**: A monthly calendar overlay illustrating transaction dots corresponding to specific days.
+- **Daily Audits**: Select a date to view a list of transactions recorded for that day.
+
+### 7. 📑 Reports & Financial Audits
+- **Breakdown Analytics**: Detailed summary tables calculating category totals and limit utilizations.
+- **Multi-Format Exports**: Support for printing complete financial statements or exporting datasets to Microsoft Excel spreadsheets.
+
+### 8. 🤖 AI Financial Advisor
+- **Contextual Insights**: Submits user spending habits to an AI interpreter to obtain recommendations on budget improvements and savings opportunities.
+
+### 9. ⚙️ Settings & Configuration
+- **Profile Customizations**: Modify user account identifiers.
+- **Global Preferences**: Swap currency symbols (INR, USD, EUR, GBP) and preferred system language (English, Hindi, Spanish, French).
+- **Sub-Tab Security & Auth**: Turn on Two-Factor Authentication or modify account passwords securely.
+- **Backup & Recovery**: Instantly export local transaction history and database records as a JSON backup file or import JSON backups.
 
 ---
 
@@ -37,7 +89,7 @@ We have upgraded the application with several premium design systems and backend
 
 ---
 
-## ⚙️ Installation & Setup
+## ⚙️ Setup & Configuration
 
 ### 1. Clone the Repository
 ```bash
@@ -76,14 +128,14 @@ The application client runs on `http://localhost:5173` (Vite dev server) and lin
 
 ## 🖼️ Screenshots
 
-### Signup Page
-![Signup Page](Screenshorts/signup.png)
+<p align="center">
+  <b>Signup & Login Screens</b><br>
+  <img src="Screenshorts/signup.png" width="48%" />
+  <img src="Screenshorts/login.png" width="48%" />
+</p>
 
-### Login Page
-![Login Page](Screenshorts/login.png)
-
-### Add Income Panel
-![Add Income](Screenshorts/AddIncome.png)
-
-### Add Expenses Panel
-![Add Expenses](Screenshorts/AddExpenses.png)
+<p align="center">
+  <b>Transaction Input Forms</b><br>
+  <img src="Screenshorts/AddIncome.png" width="48%" />
+  <img src="Screenshorts/AddExpenses.png" width="48%" />
+</p>

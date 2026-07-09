@@ -3,7 +3,7 @@ import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from "da
 import {
   Building, CreditCard, DollarSign, Smartphone, ArrowUpRight, ArrowDownRight,
   Percent, TrendingUp, Wallet, ShieldAlert, CheckCircle2, AlertTriangle, Info,
-  TrendingDown, Calendar, ShoppingBag, ListCollapse, UserCheck, Flame, PieChart, Activity
+  TrendingDown, Calendar, ShoppingBag, ListCollapse, UserCheck, Flame, PieChart, Activity, Download
 } from "lucide-react";
 import { InitialTransactions, ExpenseCategories, IncomeCategories, Wallets, FinancialHealthReport } from "../utils/MockData";
 import { Line, Bar, Doughnut } from "react-chartjs-2";
@@ -198,6 +198,20 @@ function DashboardView({ searchFilter = "" }) {
       cleanupCharts();
     };
   }, []);
+
+  const exportChartAsImage = (canvasId, fileName) => {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) {
+      addToast("Chart canvas not found. Please try again.", "error");
+      return;
+    }
+    const url = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${fileName}.png`;
+    a.click();
+    addToast(`${fileName} exported as PNG image!`, "success");
+  };
 
   // Filter transactions based on search
   const filteredTransactions = transactions.filter(t => {
@@ -797,7 +811,17 @@ function DashboardView({ searchFilter = "" }) {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-350">1. Monthly Expense Trend</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-650 dark:text-indigo-400 font-semibold">Line</span>
+            <div className="flex items-center gap-1.5">
+              <button 
+                type="button"
+                onClick={() => exportChartAsImage("monthly-expense-trend-chart", "Monthly_Expense_Trend")}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-600 transition"
+                title="Download Chart"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-650 dark:text-indigo-400 font-semibold">Line</span>
+            </div>
           </div>
           <div className="h-44">
             <Line id="monthly-expense-trend-chart" key="monthly-expense-trend-chart" data={lineChartData} options={lineChartOptions} />
@@ -808,7 +832,17 @@ function DashboardView({ searchFilter = "" }) {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-350">2. Income vs Expense</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/50 text-emerald-650 dark:text-emerald-450 font-semibold">Area</span>
+            <div className="flex items-center gap-1.5">
+              <button 
+                type="button"
+                onClick={() => exportChartAsImage("income-vs-expense-chart", "Income_vs_Expense")}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-600 transition"
+                title="Download Chart"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/50 text-emerald-650 dark:text-emerald-450 font-semibold">Area</span>
+            </div>
           </div>
           <div className="h-44">
             <Line
@@ -846,7 +880,17 @@ function DashboardView({ searchFilter = "" }) {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-350">3. Category Distribution</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-650 dark:text-amber-400 font-semibold">Donut</span>
+            <div className="flex items-center gap-1.5">
+              <button 
+                type="button"
+                onClick={() => exportChartAsImage("category-distribution-chart", "Category_Distribution")}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-600 transition"
+                title="Download Chart"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/50 text-amber-650 dark:text-amber-400 font-semibold">Donut</span>
+            </div>
           </div>
           <div className="h-44">
             {categoryTotals.length === 0 ? (
@@ -861,7 +905,17 @@ function DashboardView({ searchFilter = "" }) {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-350">4. Weekly Spending</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-650 dark:text-indigo-400 font-semibold">Bar</span>
+            <div className="flex items-center gap-1.5">
+              <button 
+                type="button"
+                onClick={() => exportChartAsImage("weekly-spending-chart", "Weekly_Spending")}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-600 transition"
+                title="Download Chart"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-650 dark:text-indigo-405 font-semibold">Bar</span>
+            </div>
           </div>
           <div className="h-44">
             <Bar
@@ -884,7 +938,17 @@ function DashboardView({ searchFilter = "" }) {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-350">5. Daily Spending</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-950/50 text-purple-650 dark:text-purple-400 font-semibold">Line</span>
+            <div className="flex items-center gap-1.5">
+              <button 
+                type="button"
+                onClick={() => exportChartAsImage("daily-spending-chart", "Daily_Spending")}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-600 transition"
+                title="Download Chart"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-950/50 text-purple-650 dark:text-purple-400 font-semibold">Line</span>
+            </div>
           </div>
           <div className="h-44">
             <Line
@@ -933,7 +997,17 @@ function DashboardView({ searchFilter = "" }) {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-350">7. Savings Growth</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/50 text-emerald-650 dark:text-emerald-450 font-semibold">Area</span>
+            <div className="flex items-center gap-1.5">
+              <button 
+                type="button"
+                onClick={() => exportChartAsImage("savings-growth-chart", "Savings_Growth")}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-600 transition"
+                title="Download Chart"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/50 text-emerald-650 dark:text-emerald-450 font-semibold">Area</span>
+            </div>
           </div>
           <div className="h-44">
             <Line
@@ -959,7 +1033,17 @@ function DashboardView({ searchFilter = "" }) {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-350">8. Yearly Expense Trend</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-650 dark:text-indigo-400 font-semibold">Line</span>
+            <div className="flex items-center gap-1.5">
+              <button 
+                type="button"
+                onClick={() => exportChartAsImage("yearly-expense-trend-chart", "Yearly_Expense_Trend")}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-600 transition"
+                title="Download Chart"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-650 dark:text-indigo-400 font-semibold">Line</span>
+            </div>
           </div>
           <div className="h-44">
             <Line
@@ -1005,7 +1089,17 @@ function DashboardView({ searchFilter = "" }) {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-350">10. Payment Method Distribution</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 font-semibold">Pie</span>
+            <div className="flex items-center gap-1.5">
+              <button 
+                type="button"
+                onClick={() => exportChartAsImage("payment-method-chart", "Payment_Method_Distribution")}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-600 transition"
+                title="Download Chart"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 font-semibold">Pie</span>
+            </div>
           </div>
           <div className="h-44">
             <Doughnut
@@ -1033,7 +1127,17 @@ function DashboardView({ searchFilter = "" }) {
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-3xl p-5 shadow-sm space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-350">11. Monthly Comparison</span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-650 dark:text-indigo-400 font-semibold">Grouped Bar</span>
+            <div className="flex items-center gap-1.5">
+              <button 
+                type="button"
+                onClick={() => exportChartAsImage("monthly-comparison-chart", "Monthly_Comparison")}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-slate-600 transition"
+                title="Download Chart"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-650 dark:text-indigo-400 font-semibold">Grouped Bar</span>
+            </div>
           </div>
           <div className="h-44">
             <Bar
