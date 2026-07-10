@@ -1,6 +1,7 @@
 # Exclude files
 abc
 PLANNED_FEATURES.md
+atanu_biswas_resume.md
 node_modules/
 Backend/node_modules/
 Frontend/node_modules/

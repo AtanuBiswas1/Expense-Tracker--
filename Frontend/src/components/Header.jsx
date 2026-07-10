@@ -86,7 +86,7 @@ function Header() {
   if (!isAuthenticated) return null;
 
   return (
-    <nav className="h-16 sticky top-0 z-50 flex items-center justify-between px-6 bg-white/80 dark:bg-[#0b0f19]/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-300">
+    <nav className="h-16 sticky top-0 z-50 flex items-center justify-between px-6 bg-white/80 dark:bg-[#090d16]/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-300">
       {/* Brand Logo */}
       <div className="flex items-center space-x-3">
         <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
