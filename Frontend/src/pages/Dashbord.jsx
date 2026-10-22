@@ -101,20 +101,20 @@ function Dashbord() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col md:flex-row bg-slate-50 dark:bg-[#090d16] text-slate-800 dark:text-slate-100 transition-colors duration-300">
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col md:flex-row bg-slate-50 dark:bg-black text-slate-900 dark:text-zinc-100 transition-colors duration-300">
       
       {/* Mobile Drawer Trigger Bar */}
-      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-[#0a0a0a] border-b border-slate-200 dark:border-zinc-900">
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-900 text-slate-500"
         >
           {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
-        <span className="text-sm font-extrabold text-indigo-600 tracking-wider">COAB PLATFORM</span>
+        <span className="text-sm font-extrabold text-black dark:text-white tracking-wider">COAB PLATFORM</span>
         <button
           onClick={() => setShowAddExpense(true)}
-          className="p-1.5 bg-indigo-600 text-white rounded-lg"
+          className="p-1.5 bg-black text-white dark:bg-zinc-800 rounded-lg"
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -122,7 +122,7 @@ function Dashbord() {
 
       {/* Left Sidebar Layout */}
       <aside 
-        className={`w-64 flex-shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800/80 p-4 space-y-4 md:block fixed md:static inset-y-16 left-0 z-40 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
+        className={`w-64 flex-shrink-0 bg-white dark:bg-[#070707] border-r border-slate-200/80 dark:border-zinc-900 p-4 space-y-4 md:block fixed md:static inset-y-16 left-0 z-40 transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -145,8 +145,8 @@ function Dashbord() {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 ${
                   isTabActive 
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/10" 
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-950"
+                    ? "bg-black text-white shadow-md shadow-black/20 dark:bg-zinc-900 dark:border dark:border-zinc-800 dark:text-white" 
+                    : "text-slate-600 hover:text-black dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-950"
                 }`}
               >
                 {item.icon}

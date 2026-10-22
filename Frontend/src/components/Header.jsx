@@ -86,17 +86,26 @@ function Header() {
   if (!isAuthenticated) return null;
 
   return (
-    <nav className="h-16 sticky top-0 z-50 flex items-center justify-between px-6 bg-white/80 dark:bg-[#090d16]/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-300">
-      {/* Brand Logo */}
-      <div className="flex items-center space-x-3">
-        <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <nav className="h-16 sticky top-0 z-50 flex items-center justify-between px-6 bg-white/80 dark:bg-black/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-zinc-900 transition-colors duration-300">
+      {/* Brand Logo & Title */}
+      <div 
+        className="flex items-center space-x-3 cursor-pointer group select-none"
+        onClick={() => window.dispatchEvent(new CustomEvent("navigate-to-tab", { detail: "Dashboard" }))}
+      >
+        <div className="h-9 w-9 rounded-xl bg-black dark:bg-[#121214] border border-black/10 dark:border-zinc-800 flex items-center justify-center shadow-lg shadow-black/10 dark:shadow-none transition-transform duration-300 group-hover:scale-105">
+          <svg className="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            <circle cx="12" cy="12" r="9" strokeWidth="1.8" stroke="currentColor" opacity="0.25" />
           </svg>
         </div>
-        <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-650 bg-clip-text text-transparent">
-          COAB
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-black tracking-tight text-black dark:text-white transition-colors">
+            COAB
+          </span>
+          <span className="text-[9px] font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            FINANCE
+          </span>
+        </div>
       </div>
 
       {/* Global Search Bar */}
@@ -107,7 +116,7 @@ function Header() {
           placeholder="Search transactions, budgets, insights..."
           value={searchTerm}
           onChange={handleSearchChange}
-          className="w-full pl-10 pr-4 py-1.5 text-sm rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:ring-indigo-500 transition-all duration-200"
+          className="w-full pl-10 pr-4 py-1.5 text-sm rounded-full bg-slate-100 dark:bg-[#0c0c0c] border border-slate-200/80 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-black dark:focus:border-zinc-700 focus:ring-1 focus:ring-black dark:focus:ring-zinc-700 transition-all duration-200"
         />
       </div>
 
@@ -116,7 +125,7 @@ function Header() {
         {/* Quick Add Expense */}
         <button
           onClick={handleQuickAdd}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/25 transition-all duration-300 transform active:scale-95"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-black hover:bg-neutral-800 text-white text-xs font-semibold rounded-xl shadow-md shadow-black/15 transition-all duration-300 transform active:scale-95"
         >
           <Plus className="w-4 h-4" />
           <span>Quick Add</span>
@@ -125,10 +134,10 @@ function Header() {
         {/* Theme Switcher */}
         <button
           onClick={toggleTheme}
-          className="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl transition-all duration-200"
-          title="Toggle Dark/Light Mode"
+          className="p-2 text-slate-700 hover:text-black dark:text-zinc-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-900 rounded-xl transition-all duration-200 active:scale-90"
+          title={isThemeDark ? "Switch to Light Mode (Click Black)" : "Switch to Deep Black Mode"}
         >
-          {isThemeDark ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
+          {isThemeDark ? <Sun className="w-4.5 h-4.5 text-amber-400" /> : <Moon className="w-4.5 h-4.5 text-slate-900" />}
         </button>
 
         {/* Notification Center */}
@@ -180,37 +189,55 @@ function Header() {
         <div className="relative">
           <button
             onClick={() => { setShowProfileMenu(!showProfileMenu); setShowNotifications(false); }}
-            className="flex items-center space-x-2.5 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900 transition-all duration-200"
+            className="flex items-center space-x-2.5 p-1 pl-1.5 pr-2.5 rounded-2xl hover:bg-slate-100 dark:hover:bg-zinc-900 border border-transparent hover:border-slate-200 dark:hover:border-zinc-800 transition-all duration-200"
           >
-            <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white uppercase">
-              {userData?.data?.user?.userName?.charAt(0) || "U"}
+            <div className="relative">
+              {userData?.data?.user?.avatar ? (
+                <img
+                  src={userData.data.user.avatar}
+                  alt={userData?.data?.user?.userName || "Avatar"}
+                  className="h-8 w-8 rounded-xl object-cover ring-1 ring-black/10 dark:ring-zinc-700 shadow-sm"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-slate-900 via-neutral-900 to-black dark:from-zinc-900 dark:to-zinc-950 border border-black/10 dark:border-zinc-700/80 flex items-center justify-center text-xs font-black text-white uppercase shadow-sm">
+                  {userData?.data?.user?.userName?.charAt(0) || "U"}
+                </div>
+              )}
+              {/* Online indicator dot */}
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-black"></span>
             </div>
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-350 hidden sm:block">
-              {userData?.data?.user?.userName || "User"}
-            </span>
+            <div className="hidden sm:flex flex-col text-left">
+              <span className="text-xs font-bold text-black dark:text-zinc-100 leading-tight">
+                {userData?.data?.user?.userName || "User"}
+              </span>
+              <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 leading-none mt-0.5">
+                Personal
+              </span>
+            </div>
           </button>
 
           {showProfileMenu && (
-            <div className="absolute right-0 mt-3 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 py-1.5 overflow-hidden">
-              <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800">
-                <p className="text-xs text-slate-400">Signed in as</p>
-                <p className="text-xs font-semibold text-slate-700 dark:text-slate-350 truncate">{userData?.data?.user?.email || "user@coab.com"}</p>
+            <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-2xl z-50 py-2 overflow-hidden animate-slide-in">
+              <div className="px-4 py-2.5 border-b border-slate-100 dark:border-zinc-800/80">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Signed In As</p>
+                <p className="text-xs font-bold text-black dark:text-zinc-100 truncate mt-0.5">{userData?.data?.user?.userName || "User"}</p>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate">{userData?.data?.user?.email || "user@coab.com"}</p>
               </div>
               <button
                 onClick={() => {
                   setShowProfileMenu(false);
                   window.dispatchEvent(new CustomEvent("navigate-to-tab", { detail: "Settings" }));
                 }}
-                className="w-full px-4 py-2 text-left text-xs text-slate-650 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-950 flex items-center gap-2 transition-colors duration-200"
+                className="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-900 flex items-center gap-2.5 transition-colors duration-150"
               >
-                <User className="w-3.5 h-3.5" />
+                <User className="w-4 h-4 text-slate-500 dark:text-zinc-400" />
                 <span>Profile Settings</span>
               </button>
               <button
                 onClick={handleLogout}
-                className="w-full px-4 py-2 text-left text-xs text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 flex items-center gap-2 border-t border-slate-100 dark:border-slate-800 transition-colors duration-200"
+                className="w-full px-4 py-2.5 text-left text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 flex items-center gap-2.5 border-t border-slate-100 dark:border-zinc-800/80 transition-colors duration-150"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-4 h-4" />
                 <span>Logout</span>
               </button>
             </div>

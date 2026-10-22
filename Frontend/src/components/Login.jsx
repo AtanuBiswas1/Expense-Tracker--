@@ -1,17 +1,46 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import Input from "./Input";
 import { loginFunction } from "../API/apiCall.Function.js";
 import { useDispatch } from "react-redux";
 import { checkAuth } from "../features/loginuser/loginUser.Slice.js";
+import { Sun, Moon } from "lucide-react";
 
 function Login() {
   const { register, handleSubmit, reset, setValue } = useForm();
   const [loading, setLoading] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
+  const [isThemeDark, setIsThemeDark] = useState(true);
   const dispatch = useDispatch();
   const loginButtonRef = useRef(null);
+
+  // Sync theme with localStorage & html class
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const isDark = savedTheme !== "light";
+    setIsThemeDark(isDark);
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const htmlElement = document.documentElement;
+    if (htmlElement.classList.contains("dark")) {
+      htmlElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+      setIsThemeDark(false);
+      window.dispatchEvent(new CustomEvent("theme-change", { detail: "light" }));
+    } else {
+      htmlElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+      setIsThemeDark(true);
+      window.dispatchEvent(new CustomEvent("theme-change", { detail: "dark" }));
+    }
+  };
 
   const fillDemoCredentials = () => {
     setValue("email", "requiter@gmail.com");
@@ -29,35 +58,58 @@ function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#090d16] to-[#0f172a] text-slate-200 overflow-hidden">
-      <div className="w-full max-w-md space-y-3 bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 p-5 rounded-2xl shadow-2xl relative overflow-hidden">
-        {/* Decorative background glow */}
-        <div className="absolute -top-10 -left-10 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none"></div>
-        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="flex min-h-screen items-center justify-center px-4 py-8 bg-slate-50 dark:bg-black text-slate-900 dark:text-zinc-100 transition-colors duration-300 relative overflow-hidden">
+      {/* Background ambient accents */}
+      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-slate-200/50 dark:bg-zinc-900/40 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-slate-200/50 dark:bg-zinc-900/40 rounded-full blur-3xl pointer-events-none"></div>
+
+      {/* Theme toggle in top corner */}
+      <button
+        onClick={toggleTheme}
+        className="absolute top-6 right-6 p-2.5 rounded-2xl bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-400 hover:text-black dark:hover:text-white shadow-sm hover:shadow transition-all duration-200 active:scale-90 z-20"
+        title={isThemeDark ? "Switch to Light Mode (Click Black)" : "Switch to Deep Black Mode"}
+      >
+        {isThemeDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-900" />}
+      </button>
+
+      {/* Main Login Card */}
+      <div className="w-full max-w-md space-y-4 bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-zinc-800/80 p-6 sm:p-7 rounded-3xl shadow-xl dark:shadow-2xl relative z-10 transition-colors duration-300">
         
-        <div className="text-center relative z-10">
-          <h2 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-teal-400 via-emerald-400 to-emerald-500 bg-clip-text text-transparent">
-            Welcome to COAB
-          </h2>
-          <p className="mt-0.5 text-[11px] text-slate-400">
+        {/* Brand Icon & Heading */}
+        <div className="text-center space-y-2">
+          <div className="inline-flex h-11 w-11 rounded-2xl bg-black dark:bg-[#121214] border border-black/10 dark:border-zinc-800 items-center justify-center shadow-lg shadow-black/10 dark:shadow-none mb-1">
+            <svg className="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              <circle cx="12" cy="12" r="9" strokeWidth="1.8" stroke="currentColor" opacity="0.25" />
+            </svg>
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <h2 className="text-2xl font-black tracking-tight text-black dark:text-white">
+              Welcome to COAB
+            </h2>
+            <span className="text-[9px] font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              PRO
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-zinc-400">
             Log in to manage your budget & track your wealth
           </p>
         </div>
 
         {loginMessage && (
-          <div className="bg-red-500/15 border border-red-500/30 text-red-200 text-xs rounded-lg p-2 text-center animate-pulse">
+          <div className="bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs rounded-xl p-2.5 text-center font-medium animate-shake">
             {loginMessage}
           </div>
         )}
 
-        <form className="mt-2 space-y-3 relative z-10" onSubmit={handleSubmit(loginData)}>
+        <form className="space-y-3" onSubmit={handleSubmit(loginData)}>
           <div className="space-y-1">
             <Input
               label="Email Address"
               type="email"
               placeholder="name@example.com"
-              containerClassName="py-0.5 px-3"
-              className="!py-1.5 !px-2.5 !bg-slate-950/60 !text-slate-200 !border-slate-800 focus:!border-teal-500 focus:!ring-1 focus:!ring-teal-500 focus:!bg-slate-950 text-xs"
+              containerClassName="py-0.5"
+              className="!py-2 !px-3 !bg-slate-50 dark:!bg-[#050505] !text-black dark:!text-white !border-slate-200 dark:!border-zinc-800 focus:!border-black dark:focus:!border-zinc-600 focus:!bg-white dark:focus:!bg-black text-xs rounded-xl transition-all"
               {...register("email", {
                 required: true,
                 validate: {
@@ -71,28 +123,28 @@ function Login() {
               label="Password"
               type="password"
               placeholder="••••••••"
-              containerClassName="py-0.5 px-3"
-              className="!py-1.5 !px-2.5 !bg-slate-950/60 !text-slate-200 !border-slate-800 focus:!border-teal-500 focus:!ring-1 focus:!ring-teal-500 focus:!bg-slate-950 text-xs"
+              containerClassName="py-0.5"
+              className="!py-2 !px-3 !bg-slate-50 dark:!bg-[#050505] !text-black dark:!text-white !border-slate-200 dark:!border-zinc-800 focus:!border-black dark:focus:!border-zinc-600 focus:!bg-white dark:focus:!bg-black text-xs rounded-xl transition-all"
               {...register("password", {
                 required: true,
               })}
             />
           </div>
 
-          <div className="pt-1">
+          <div className="pt-2">
             <button
               ref={loginButtonRef}
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-xs font-semibold rounded-xl text-slate-900 bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-500 hover:to-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-300 shadow-lg shadow-teal-500/10 hover:shadow-teal-500/20 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full flex justify-center py-2.5 px-4 text-xs font-bold rounded-xl text-white bg-black hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 shadow-md shadow-black/15 transition-all duration-200 transform active:scale-98 disabled:opacity-50 disabled:pointer-events-none"
             >
               {loading ? (
-                <div className="flex items-center gap-1.5 justify-center">
-                  <svg className="animate-spin h-4 w-4 text-slate-900" fill="none" viewBox="0 0 24 24">
+                <div className="flex items-center gap-2 justify-center">
+                  <svg className="animate-spin h-4 w-4 text-current" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  <span>Processing...</span>
+                  <span>Authenticating...</span>
                 </div>
               ) : (
                 "Log In"
@@ -100,20 +152,20 @@ function Login() {
             </button>
           </div>
 
-          <div className="text-center pt-0.5">
+          <div className="text-center pt-1">
             <button
               type="button"
               onClick={fillDemoCredentials}
-              className="w-full flex justify-center py-2 px-4 border border-teal-500/30 text-[10px] font-semibold rounded-xl text-teal-400 bg-teal-500/5 hover:bg-teal-500/10 focus:outline-none focus:ring-1 focus:ring-teal-500 transition-all duration-300"
+              className="w-full flex justify-center py-2 px-4 border border-slate-200 dark:border-zinc-800 text-[11px] font-semibold rounded-xl text-slate-700 dark:text-zinc-300 bg-slate-50 dark:bg-zinc-900/60 hover:bg-slate-100 dark:hover:bg-zinc-850 hover:border-slate-300 dark:hover:border-zinc-700 transition-all duration-200"
             >
-              💼 Recruiters: Click here for Quick Demo Access
+              💼 Recruiters: Click for 1-Tap Demo Access
             </button>
           </div>
         </form>
 
-        <div className="text-center text-xs text-slate-400 mt-2 relative z-10">
+        <div className="text-center text-xs text-slate-500 dark:text-zinc-400 pt-2 border-t border-slate-100 dark:border-zinc-800/80">
           Don't have an account?{" "}
-          <Link to="/signup" className="text-teal-400 hover:text-teal-300 font-semibold transition-colors duration-200">
+          <Link to="/signup" className="text-black dark:text-white font-bold hover:underline transition-all">
             Sign up here
           </Link>
         </div>
