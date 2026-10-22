@@ -1,17 +1,21 @@
-import {app} from './src/app.js'
-import 'dotenv/config';
-import dotenv from "dotenv";
-import connectDB from "./src/db/config.js"
+import { app } from "./src/app.js";
+import "dotenv/config";
+import connectDB from "./src/db/config.js";
 
-dotenv.config();
+const PORT = process.env.PORT || 8000;
 
-  connectDB()
+// Start HTTP server immediately on 0.0.0.0 so cloud providers (Render, Railway, Heroku) pass health checks
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`⚙️ Server is running and listening on port: ${PORT}`);
+});
+
+// Connect to MongoDB
+connectDB()
   .then(() => {
-      app.listen(process.env.PORT || 6000, () => {
-          console.log(`⚙️ Server is running at port : ${process.env.PORT}`);
-      })
+    console.log("🚀 Application is fully operational.");
   })
   .catch((err) => {
-      console.log("MONGO db connection failed !!! ", err);
-  })
+    console.error("❌ MongoDB connection error:", err.message);
+  });
 
+export { server };

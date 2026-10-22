@@ -1,37 +1,28 @@
-import 'dotenv/config'
-import express from "express"
-import cors from "cors"
-import cookieParser from "cookie-parser"
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
-const app = express()
+const app = express();
 
+// Health check endpoint for cloud platforms (Render, Railway, AWS, etc.)
 app.get("/", (req, res) => {
-  res.send("Hello, World!");
-
+  res.status(200).json({
+    status: "ok",
+    message: "COAB Expense Tracker API is live and operational 🚀",
+    timestamp: new Date().toISOString()
+  });
 });
-const allowedOrigins = [
-  process.env.CORS_ORIGIN,
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:3000",
-  "http://127.0.0.1:5173",
-  "http://127.0.0.1:5174",
-].filter(Boolean);
 
+// Configure CORS for both local dev and production cloud deployment
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (e.g. mobile apps or curl)
+      // Allow requests with no origin (e.g. mobile apps, curl, server health pings)
       if (!origin) return callback(null, true);
-      if (
-        process.env.CORS_ORIGIN === "*" ||
-        allowedOrigins.includes(origin) ||
-        origin.startsWith("http://localhost:") ||
-        origin.startsWith("http://127.0.0.1:")
-      ) {
-        return callback(null, true);
-      }
-      return callback(new Error("CORS policy violation: origin not allowed"));
+
+      // In production and dev, allow the request's origin dynamically so credentials are fully supported
+      return callback(null, true);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -39,16 +30,26 @@ app.use(
   })
 );
 
-app.use(express.json())
-app.use(express.static("public"))
-app.use(cookieParser())
+app.use(express.json());
+app.use(express.static("public"));
+app.use(cookieParser());
 
-//routes import
-import userRouter from "./router/user.router.js"
+// Routes import
+import userRouter from "./router/user.router.js";
 
+// Routes declaration
+app.use("/api/v1/users", userRouter);
 
-//routes declaration
-app.use("/api/v1/users", userRouter)
+// Global Error Handling Middleware - prevents raw 500 HTML crashes
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  console.error(`[Error] ${req.method} ${req.url}:`, err.message);
+  return res.status(statusCode).json({
+    statusCode,
+    success: false,
+    message: err.message || "Internal Server Error",
+    errors: err.errors || []
+  });
+});
 
-// here route url like ----> http://localhost:800/api/v1/users/register
-export { app }
+export { app };
